@@ -134,13 +134,13 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
   };
 
   const handleSaveTime = () => {
-    const timePattern = /^(\d{1,2}):(\d{2}):(\d{2})$/;
+    const timePattern = /^(\d+):(\d{2}):(\d{2})$/;
     const match = tempTime.match(timePattern);
     
     if (!match) {
       toast({
         title: "Invalid format",
-        description: "Please use HH:MM:SS format",
+        description: "Please use HH:MM:SS format (hours can be any number)",
         variant: "destructive",
       });
       return;
