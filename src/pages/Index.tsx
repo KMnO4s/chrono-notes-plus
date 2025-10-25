@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSNThemeSync } from "@/hooks/use-sn-theme";
 import snApi from "sn-extension-api";
+import { formatTime, calculateAverageSession } from "@/lib/time-utils";
 
 const Index = () => {
   console.log('[Chrono] Component rendering');
@@ -53,6 +54,14 @@ const Index = () => {
             ...c,
             order: c.order !== undefined ? c.order : index,
             color: c.color || 'blue',
+            // Initialize stats if missing (migration)
+            stats: c.stats || {
+              totalTime: 0,
+              sessionCount: 0,
+              sessions: [],
+              createdAt: Date.now(),
+              lastUsed: null,
+            },
           }));
           setChronometers(withOrder);
           console.log('[Chrono] Loaded from Standard Notes:', withOrder.length, 'chronometers');
@@ -86,6 +95,14 @@ const Index = () => {
               ...c,
               order: c.order !== undefined ? c.order : index,
               color: c.color || 'blue',
+              // Initialize stats if missing (migration)
+              stats: c.stats || {
+                totalTime: 0,
+                sessionCount: 0,
+                sessions: [],
+                createdAt: Date.now(),
+                lastUsed: null,
+              },
             }));
             setChronometers(withOrder);
             console.log('[Chrono] Updated from external source:', withOrder.length, 'chronometers');
@@ -187,6 +204,13 @@ const Index = () => {
       isRunning: false,
       order: chronometers.length,
       color: 'blue',
+      stats: {
+        totalTime: 0,
+        sessionCount: 0,
+        sessions: [],
+        createdAt: Date.now(),
+        lastUsed: null,
+      },
     };
     setChronometers([...chronometers, newChronometer]);
     toast({
@@ -196,8 +220,43 @@ const Index = () => {
   };
 
   const updateChronometer = (id: string, updates: Partial<ChronometerData>) => {
-    setChronometers(
-      chronometers.map((c) => (c.id === id ? { ...c, ...updates } : c))
+    setChronometers(prevChronometers =>
+      prevChronometers.map((c) => {
+        if (c.id !== id) return c;
+        
+        // Check if this is a reset action with elapsed time to capture
+        const isReset = updates.elapsedTime === 0 && 
+                       updates.isRunning === false && 
+                       c.elapsedTime > 0;
+        
+        if (isReset && c.stats) {
+          // Capture the session
+          const sessionDuration = c.elapsedTime;
+          const now = Date.now();
+          const sessionStartTime = c.startTime || (now - sessionDuration);
+          
+          const newSession = {
+            id: `${id}-${now}`,
+            startTime: sessionStartTime,
+            endTime: now,
+            duration: sessionDuration,
+            completedAt: now,
+          };
+          
+          // Update stats
+          const updatedStats = {
+            ...c.stats,
+            totalTime: c.stats.totalTime + sessionDuration,
+            sessionCount: c.stats.sessionCount + 1,
+            sessions: [...c.stats.sessions, newSession],
+            lastUsed: now,
+          };
+          
+          return { ...c, ...updates, stats: updatedStats };
+        }
+        
+        return { ...c, ...updates };
+      })
     );
   };
 
@@ -274,13 +333,6 @@ const Index = () => {
     });
   };
 
-  const formatTime = (milliseconds: number): string => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
 
   const exportAsJSON = () => {
     const sortedChronometers = [...chronometers].sort((a, b) => a.order - b.order);
@@ -304,13 +356,17 @@ const Index = () => {
   const exportAsCSV = () => {
     const sortedChronometers = [...chronometers].sort((a, b) => a.order - b.order);
     
-    const headers = ['Order', 'Name', 'Time', 'Status', 'Color'];
+    const headers = ['Order', 'Name', 'Current Time', 'Status', 'Color', 'Total Time', 'Sessions', 'Avg Session', 'Last Used'];
     const rows = sortedChronometers.map(c => [
       c.order + 1,
       c.name,
       formatTime(c.elapsedTime),
       c.isRunning ? 'Running' : 'Paused',
-      c.color || 'blue'
+      c.color || 'blue',
+      formatTime(c.stats?.totalTime || 0),
+      c.stats?.sessionCount || 0,
+      formatTime(calculateAverageSession(c.stats?.sessions || [])),
+      c.stats?.lastUsed ? new Date(c.stats.lastUsed).toLocaleString() : 'Never'
     ]);
     
     const csvContent = [

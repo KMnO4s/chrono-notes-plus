@@ -13,9 +13,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Play, Pause, Trash2, RotateCcw, Pencil, Check, ChevronUp, ChevronDown, Palette } from "lucide-react";
+import { Play, Pause, Trash2, RotateCcw, Pencil, Check, ChevronUp, ChevronDown, Palette, BarChart2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { StatisticsDialog } from "./StatisticsDialog";
+import { formatTime, formatRelativeTime } from "@/lib/time-utils";
+
+export interface Session {
+  id: string;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  completedAt: number;
+}
 
 export interface ChronometerData {
   id: string;
@@ -25,6 +35,13 @@ export interface ChronometerData {
   isRunning: boolean;
   order: number;
   color?: string;
+  stats?: {
+    totalTime: number;
+    sessionCount: number;
+    sessions: Session[];
+    createdAt: number;
+    lastUsed: number | null;
+  };
 }
 
 export const CHRONOMETER_COLORS = [
@@ -49,16 +66,6 @@ interface ChronometerProps {
   onReorder?: (newOrder: number) => void;
 }
 
-const formatTime = (milliseconds: number): string => {
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-};
 
 export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
@@ -69,6 +76,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const [tempOrder, setTempOrder] = useState("");
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [showStatsDialog, setShowStatsDialog] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
@@ -509,6 +518,61 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
             </AlertDialogContent>
           </AlertDialog>
         </div>
+
+        {/* Statistics Section */}
+        {chronometer.stats && (
+          <>
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-muted-foreground">Statistics</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowStats(!showStats)}
+                  className="h-7 text-xs"
+                >
+                  {showStats ? 'Hide' : 'Show'}
+                </Button>
+              </div>
+              
+              {showStats && (
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Total Time:</span>
+                    <span className="font-medium font-mono">{formatTime(chronometer.stats.totalTime)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Sessions:</span>
+                    <span className="font-medium">{chronometer.stats.sessionCount}</span>
+                  </div>
+                  {chronometer.stats.lastUsed && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Last used:</span>
+                      <span className="font-medium">{formatRelativeTime(chronometer.stats.lastUsed)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowStatsDialog(true)}
+                className="w-full"
+                disabled={chronometer.stats.sessionCount === 0}
+              >
+                <BarChart2 className="h-4 w-4 mr-2" />
+                View Detailed Statistics
+              </Button>
+            </div>
+
+            <StatisticsDialog
+              chronometer={chronometer}
+              open={showStatsDialog}
+              onOpenChange={setShowStatsDialog}
+            />
+          </>
+        )}
       </div>
     </Card>
   );
