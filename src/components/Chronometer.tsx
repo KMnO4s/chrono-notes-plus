@@ -135,17 +135,13 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
                 value={tempName}
                 onChange={(e) => setTempName(e.target.value)}
                 onKeyDown={handleKeyDown}
-                onBlur={handleSaveName}
                 className="text-lg font-medium border-input bg-background flex-1"
                 placeholder="Chronometer name"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  handleSaveName();
-                }}
+                onClick={handleSaveName}
                 className="shrink-0"
               >
                 <Check className="h-4 w-4" />
