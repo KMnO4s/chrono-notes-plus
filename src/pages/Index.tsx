@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import snApi from "sn-extension-api";
 
 const Index = () => {
@@ -358,7 +359,10 @@ const Index = () => {
           </Alert>
         )}
 
-        <header className="mb-8 text-center">
+        <header className="mb-8 text-center relative">
+          <div className="absolute top-0 right-0">
+            <ThemeToggle />
+          </div>
           <div className="flex items-center justify-center gap-3 mb-3">
             <Timer className="h-10 w-10 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">Multi-Chronometer</h1>
