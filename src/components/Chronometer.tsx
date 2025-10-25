@@ -584,12 +584,12 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                     <span className="text-muted-foreground">Sessions:</span>
                     <span className="font-medium">{chronometer.stats.sessionCount}</span>
                   </div>
-                  {chronometer.stats.lastUsed && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Last used:</span>
-                      <span className="font-medium">{formatRelativeTime(chronometer.stats.lastUsed)}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Last used:</span>
+                    <span className="font-medium">
+                      {chronometer.stats.lastUsed ? formatRelativeTime(chronometer.stats.lastUsed) : 'Never'}
+                    </span>
+                  </div>
                 </div>
               )}
               
