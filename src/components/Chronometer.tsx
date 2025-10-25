@@ -142,7 +142,10 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleSaveName}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSaveName();
+                }}
                 className="shrink-0"
               >
                 <Check className="h-4 w-4" />
