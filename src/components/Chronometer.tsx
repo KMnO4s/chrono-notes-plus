@@ -128,7 +128,10 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
   const handleStartEdit = () => {
     setTempName(chronometer.name);
     setIsEditingName(true);
-    setTimeout(() => inputRef.current?.focus(), 0);
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
   };
 
   const handleSaveName = () => {
