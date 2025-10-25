@@ -1,73 +1,218 @@
-# Welcome to your Lovable project
+# Multi-Chronometer Standard Notes Extension
 
-## Project info
+A powerful Standard Notes editor extension for tracking multiple timers simultaneously with precision timing and persistent state.
 
-**URL**: https://lovable.dev/projects/52ef8967-125e-4e51-88ad-ed2f4e50f1a6
+## Features
 
-## How can I edit this code?
+- ⏱️ Track unlimited chronometers simultaneously
+- 🎯 Individual start/pause/reset controls for each timer
+- ✏️ Editable timer names and values
+- 💾 Automatic sync across all your devices via Standard Notes
+- 🔒 End-to-end encrypted through Standard Notes
+- 🎨 Adapts to your Standard Notes theme (light/dark mode)
+- ⚡ No external dependencies - runs entirely within Standard Notes
 
-There are several ways of editing your application.
+## Installation in Standard Notes
 
-**Use Lovable**
+### Method 1: Install from URL (After GitHub Pages Setup)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/52ef8967-125e-4e51-88ad-ed2f4e50f1a6) and start prompting.
+1. Open Standard Notes
+2. Go to **Settings** → **Extensions** → **Import Extension**
+3. Paste the extension URL:
+   ```
+   https://yourusername.github.io/chronometer-extension/ext.json
+   ```
+   *(Replace `yourusername` and `chronometer-extension` with your actual GitHub username and repository name)*
+4. Click **Install**
+5. The Multi-Chronometer will now be available as an editor option
 
-Changes made via Lovable will be committed automatically to this repo.
+### Method 2: Install Locally (For Development)
 
-**Use your preferred IDE**
+1. Clone this repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. In Standard Notes, import the extension using:
+   ```
+   http://localhost:8080/ext.json
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Usage
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Create a new note in Standard Notes
+2. Select **Multi-Chronometer** from the editor picker
+3. Click **Add Chronometer** to create a new timer
+4. Use the controls to:
+   - ▶️ Start/Pause timers
+   - 🔄 Reset timers
+   - ✏️ Edit timer names and values
+   - 🗑️ Delete timers
 
-Follow these steps:
+All your chronometer data is automatically saved to the note and synced across all your devices through Standard Notes.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Deployment to GitHub Pages
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+This extension is configured for automatic deployment to GitHub Pages via GitHub Actions.
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Setup Steps
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+1. **Create a GitHub repository** for this project (if you haven't already)
+
+2. **Enable GitHub Pages:**
+   - Go to your repository **Settings** → **Pages**
+   - Under **Build and deployment**, select:
+     - **Source**: GitHub Actions
+
+3. **Update configuration files** with your GitHub information:
+
+   **In `public/ext.json`:**
+   ```json
+   {
+     "url": "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/",
+     "download_url": "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/latest.zip",
+     "latest_url": "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/ext.json"
+   }
+   ```
+
+   **In `vite.config.ts`:**
+   ```typescript
+   base: mode === "production" ? "/YOUR_REPO_NAME/" : "/"
+   ```
+
+4. **Push to the `main` branch:**
+   ```bash
+   git add .
+   git commit -m "Configure for GitHub Pages"
+   git push origin main
+   ```
+
+5. **Wait for deployment:**
+   - GitHub Actions will automatically build and deploy
+   - Check the **Actions** tab to see the deployment progress
+   - Once complete, your extension will be available at:
+     ```
+     https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/
+     ```
+
+6. **Install in Standard Notes** using the URL from step 5 with `/ext.json` appended
+
+## Technologies Used
+
+This extension is built with:
+
+- **React** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - UI components
+- **sn-extension-api** - Standard Notes integration
+
+## Local Development
+
+### Development Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server (http://localhost:8080)
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-**Edit a file directly in GitHub**
+### Testing in Standard Notes
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Run the development server (`npm run dev`)
+2. In Standard Notes, install the extension using:
+   ```
+   http://localhost:8080/ext.json
+   ```
+3. Create a note and select the Multi-Chronometer editor
+4. Make changes in your code - they'll hot-reload in Standard Notes
+5. Test all features to ensure they work correctly
 
-**Use GitHub Codespaces**
+## How It Works
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The extension integrates with Standard Notes using the `sn-extension-api` library:
 
-## What technologies are used for this project?
+- **Data Storage**: Chronometer data is stored as JSON in the note's `text` field
+- **Sync**: Standard Notes handles all synchronization and encryption
+- **Themes**: The extension uses Standard Notes theme variables for seamless integration
+- **Offline**: Works offline through Standard Notes' desktop app with the download_url
 
-This project is built with:
+### Architecture
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+┌─────────────────┐
+│ Standard Notes  │
+│   Application   │
+└────────┬────────┘
+         │
+         │ iframe
+         ▼
+┌─────────────────┐
+│  React App      │
+│  (This Ext)     │
+├─────────────────┤
+│ sn-extension-api│ ◄── Handles communication
+└─────────────────┘
+         │
+         │ JSON data
+         ▼
+┌─────────────────┐
+│  Note.text      │ ◄── Chronometer data
+│  (Encrypted)    │
+└─────────────────┘
+```
 
-## How can I deploy this project?
+## Troubleshooting
 
-Simply open [Lovable](https://lovable.dev/projects/52ef8967-125e-4e51-88ad-ed2f4e50f1a6) and click on Share -> Publish.
+### Extension doesn't load
+- Check that the URL in `ext.json` matches your GitHub Pages URL
+- Verify GitHub Pages is enabled and deployment succeeded
+- Clear Standard Notes cache and reinstall the extension
 
-## Can I connect a custom domain to my Lovable project?
+### Data not saving
+- Check browser console for errors
+- Verify the note is not read-only
+- Try creating a new note
 
-Yes, you can!
+### Theme issues
+- Ensure `@import 'sn-extension-api/dist/sn.min.css';` is in `src/index.css`
+- Check that you're using CSS variables from the theme
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Contributing
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT License - feel free to use and modify as needed.
+
+## Resources
+
+- [Standard Notes Extension Guide](https://randombits.dev/standard-notes/creating-extensions)
+- [Extension Template](https://github.com/nienow/sn-extension-template)
+- [sn-extension-api Documentation](https://github.com/nienow/sn-extension-api)
+
+## Credits
+
+Built with [Lovable](https://lovable.dev) and inspired by the Standard Notes extension ecosystem.
+
+---
+
+## Original Lovable Project
+
+**Project URL**: https://lovable.dev/projects/52ef8967-125e-4e51-88ad-ed2f4e50f1a6
+
+This project was created using Lovable and converted to a Standard Notes extension.

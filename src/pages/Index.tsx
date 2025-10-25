@@ -1,20 +1,48 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Chronometer, ChronometerData } from "@/components/Chronometer";
 import { Plus, Timer } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-const STORAGE_KEY = "chronometers";
+import snApi from "sn-extension-api";
 
 const Index = () => {
-  const [chronometers, setChronometers] = useState<ChronometerData[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [chronometers, setChronometers] = useState<ChronometerData[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const snApiRef = useRef(snApi);
 
+  // Initialize Standard Notes API
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(chronometers));
-  }, [chronometers]);
+    const api = snApiRef.current;
+    api.initialize();
+
+    // Subscribe to note updates from Standard Notes
+    const unsubscribe = api.subscribe(() => {
+      try {
+        const noteText = api.text || "";
+        if (noteText) {
+          const data = JSON.parse(noteText);
+          setChronometers(Array.isArray(data) ? data : []);
+        } else {
+          setChronometers([]);
+        }
+      } catch (e) {
+        console.error("Failed to parse note data:", e);
+        setChronometers([]);
+      }
+      setIsInitialized(true);
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  // Save chronometers to Standard Notes when they change
+  useEffect(() => {
+    if (isInitialized && snApiRef.current) {
+      snApiRef.current.text = JSON.stringify(chronometers);
+    }
+  }, [chronometers, isInitialized]);
 
   const addChronometer = () => {
     const newChronometer: ChronometerData = {
@@ -46,7 +74,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <header className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-3">

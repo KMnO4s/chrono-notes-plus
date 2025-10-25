@@ -1,0 +1,11 @@
+{
+  "identifier": "dev.chronometer.multi-timer",
+  "name": "Multi-Chronometer",
+  "description": "Track multiple timers simultaneously with precision timing and persistent state",
+  "content_type": "SN|Component",
+  "area": "editor-editor",
+  "version": "1.0.0",
+  "url": "https://yourusername.github.io/chronometer-extension/",
+  "download_url": "https://yourusername.github.io/chronometer-extension/latest.zip",
+  "latest_url": "https://yourusername.github.io/chronometer-extension/ext.json"
+}
