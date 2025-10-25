@@ -65,10 +65,11 @@ interface ChronometerProps {
   onMoveDown?: () => void;
   onReorder?: (newOrder: number) => void;
   hideStatistics?: boolean;
+  skipResetConfirmation?: boolean;
 }
 
 
-export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics }: ChronometerProps) => {
+export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
@@ -472,29 +473,40 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
             )}
           </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="lg"
-                disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset "{chronometer.name}"?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will reset the chronometer to 00:00:00. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleReset}>Reset</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {skipResetConfirmation ? (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleReset}
+              disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset "{chronometer.name}"?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will reset the chronometer to 00:00:00. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReset}>Reset</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
 
           <AlertDialog>
             <AlertDialogTrigger asChild>

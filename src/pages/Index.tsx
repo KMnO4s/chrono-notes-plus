@@ -17,6 +17,7 @@ import { formatTime, calculateAverageSession } from "@/lib/time-utils";
 
 interface AppSettings {
   hideStatistics: boolean;
+  skipResetConfirmation: boolean;
 }
 
 interface AppData {
@@ -26,6 +27,7 @@ interface AppData {
 
 const defaultSettings: AppSettings = {
   hideStatistics: false,
+  skipResetConfirmation: false,
 };
 
 const Index = () => {
@@ -532,6 +534,18 @@ const Index = () => {
                   }
                 />
               </div>
+              <div className="flex items-center justify-between px-2 py-3 border-t">
+                <label htmlFor="skip-reset-confirm" className="text-sm cursor-pointer flex-1">
+                  Skip Reset Confirmation
+                </label>
+                <Switch
+                  id="skip-reset-confirm"
+                  checked={settings.skipResetConfirmation}
+                  onCheckedChange={(checked) => 
+                    setSettings(prev => ({ ...prev, skipResetConfirmation: checked }))
+                  }
+                />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -559,6 +573,7 @@ const Index = () => {
                 onMoveDown={() => moveChronometer(chronometer.id, 'down')}
                 onReorder={(newOrder) => reorderChronometer(chronometer.id, newOrder)}
                 hideStatistics={settings.hideStatistics}
+                skipResetConfirmation={settings.skipResetConfirmation}
               />
             ))}
           </div>
