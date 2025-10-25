@@ -13,8 +13,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Play, Pause, Trash2, RotateCcw, Pencil, Check, ChevronUp, ChevronDown } from "lucide-react";
+import { Play, Pause, Trash2, RotateCcw, Pencil, Check, ChevronUp, ChevronDown, Palette } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export interface ChronometerData {
   id: string;
@@ -23,7 +24,20 @@ export interface ChronometerData {
   elapsedTime: number;
   isRunning: boolean;
   order: number;
+  color?: string;
 }
+
+export const CHRONOMETER_COLORS = [
+  { id: 'blue', name: 'Blue', hsl: '217 91% 60%' },
+  { id: 'green', name: 'Green', hsl: '142 76% 36%' },
+  { id: 'red', name: 'Red', hsl: '0 84% 60%' },
+  { id: 'orange', name: 'Orange', hsl: '25 95% 53%' },
+  { id: 'yellow', name: 'Yellow', hsl: '45 93% 47%' },
+  { id: 'teal', name: 'Teal', hsl: '173 80% 40%' },
+  { id: 'purple', name: 'Purple', hsl: '271 91% 65%' },
+  { id: 'pink', name: 'Pink', hsl: '330 81% 60%' },
+  { id: 'gray', name: 'Gray', hsl: '220 10% 50%' },
+] as const;
 
 interface ChronometerProps {
   chronometer: ChronometerData;
@@ -54,10 +68,13 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
   const [tempTime, setTempTime] = useState("");
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const [tempOrder, setTempOrder] = useState("");
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
   const orderInputRef = useRef<HTMLInputElement | null>(null);
+
+  const currentColor = CHRONOMETER_COLORS.find(c => c.id === chronometer.color) || CHRONOMETER_COLORS[0];
 
   useEffect(() => {
     if (chronometer.isRunning && chronometer.startTime) {
@@ -218,8 +235,23 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     }
   };
 
+  const handleColorChange = (colorId: string) => {
+    onUpdate(chronometer.id, { color: colorId });
+    setIsColorPickerOpen(false);
+    toast({
+      title: "Color updated",
+      description: `Chronometer color changed to ${CHRONOMETER_COLORS.find(c => c.id === colorId)?.name}`,
+    });
+  };
+
   return (
-    <Card className="p-6 pt-12 transition-all hover:shadow-lg border-border bg-card relative">
+    <Card 
+      className="p-6 pt-12 transition-all hover:shadow-lg border-border bg-card relative"
+      style={{
+        borderLeftWidth: '4px',
+        borderLeftColor: `hsl(${currentColor.hsl})`,
+      }}
+    >
       <div className="absolute top-2 left-2 flex items-center gap-1">
         {isEditingOrder ? (
           <>
@@ -257,6 +289,51 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
             #{chronometer.order + 1}
           </Button>
         )}
+        
+        {/* Color picker */}
+        <Popover open={isColorPickerOpen} onOpenChange={setIsColorPickerOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 w-7 p-0"
+              style={{ borderColor: `hsl(${currentColor.hsl})` }}
+            >
+              <div
+                className="w-4 h-4 rounded-full"
+                style={{ backgroundColor: `hsl(${currentColor.hsl})` }}
+              />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-3" align="start">
+            <div className="space-y-2">
+              <p className="text-sm font-medium mb-2">Choose color</p>
+              <div className="grid grid-cols-3 gap-2">
+                {CHRONOMETER_COLORS.map((color) => (
+                  <Button
+                    key={color.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleColorChange(color.id)}
+                    className="h-10 w-full p-1 flex flex-col items-center gap-1"
+                    style={{
+                      borderColor: chronometer.color === color.id 
+                        ? `hsl(${color.hsl})` 
+                        : 'transparent',
+                      borderWidth: chronometer.color === color.id ? '2px' : '1px',
+                    }}
+                  >
+                    <div
+                      className="w-6 h-6 rounded-full"
+                      style={{ backgroundColor: `hsl(${color.hsl})` }}
+                    />
+                    <span className="text-xs">{color.name}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="absolute top-2 right-2 flex gap-1">

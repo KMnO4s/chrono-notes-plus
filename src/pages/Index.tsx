@@ -42,6 +42,7 @@ const Index = () => {
           const withOrder = chronometerArray.map((c, index) => ({
             ...c,
             order: c.order !== undefined ? c.order : index,
+            color: c.color || 'blue',
           }));
           setChronometers(withOrder);
           console.log('[Chrono] Loaded from Standard Notes:', withOrder.length, 'chronometers');
@@ -74,6 +75,7 @@ const Index = () => {
             const withOrder = chronometerArray.map((c, index) => ({
               ...c,
               order: c.order !== undefined ? c.order : index,
+              color: c.color || 'blue',
             }));
             setChronometers(withOrder);
             console.log('[Chrono] Updated from external source:', withOrder.length, 'chronometers');
@@ -174,6 +176,7 @@ const Index = () => {
       elapsedTime: 0,
       isRunning: false,
       order: chronometers.length,
+      color: 'blue',
     };
     setChronometers([...chronometers, newChronometer]);
     toast({
