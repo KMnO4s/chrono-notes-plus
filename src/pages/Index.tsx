@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Chronometer, ChronometerData } from "@/components/Chronometer";
-import { Plus, Timer, X, Download } from "lucide-react";
+import { Plus, Timer, X, Download, Settings } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -14,6 +15,19 @@ import { useSNThemeSync } from "@/hooks/use-sn-theme";
 import snApi from "sn-extension-api";
 import { formatTime, calculateAverageSession } from "@/lib/time-utils";
 
+interface AppSettings {
+  hideStatistics: boolean;
+}
+
+interface AppData {
+  chronometers: ChronometerData[];
+  settings: AppSettings;
+}
+
+const defaultSettings: AppSettings = {
+  hideStatistics: false,
+};
+
 const Index = () => {
   console.log('[Chrono] Component rendering');
   
@@ -21,6 +35,7 @@ const Index = () => {
   useSNThemeSync();
   
   const [chronometers, setChronometers] = useState<ChronometerData[]>([]);
+  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isInitialized, setIsInitialized] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'standalone'>('checking');
   const [showBanner, setShowBanner] = useState(true);
@@ -49,7 +64,26 @@ const Index = () => {
         
         if (noteText) {
           const data = JSON.parse(noteText);
-          const chronometerArray = Array.isArray(data) ? data : [];
+          
+          // Handle both old format (array) and new format (object with chronometers and settings)
+          let chronometerArray: ChronometerData[];
+          let loadedSettings: AppSettings;
+          
+          if (Array.isArray(data)) {
+            // Old format: just an array of chronometers
+            chronometerArray = data;
+            loadedSettings = defaultSettings;
+            console.log('[Chrono] Migrating old format data');
+          } else if (data.chronometers && Array.isArray(data.chronometers)) {
+            // New format: object with chronometers and settings
+            chronometerArray = data.chronometers;
+            loadedSettings = { ...defaultSettings, ...data.settings };
+            console.log('[Chrono] Loaded new format data');
+          } else {
+            chronometerArray = [];
+            loadedSettings = defaultSettings;
+          }
+          
           const withOrder = chronometerArray.map((c, index) => ({
             ...c,
             order: c.order !== undefined ? c.order : index,
@@ -64,14 +98,17 @@ const Index = () => {
             },
           }));
           setChronometers(withOrder);
+          setSettings(loadedSettings);
           console.log('[Chrono] Loaded from Standard Notes:', withOrder.length, 'chronometers');
         } else {
           setChronometers([]);
+          setSettings(defaultSettings);
           console.log('[Chrono] No existing data, starting fresh');
         }
       } catch (e) {
         console.error('[Chrono] Failed to parse initial note data:', e);
         setChronometers([]);
+        setSettings(defaultSettings);
       }
       
       setIsInitialized(true);
@@ -90,7 +127,22 @@ const Index = () => {
           
           if (noteText) {
             const data = JSON.parse(noteText);
-            const chronometerArray = Array.isArray(data) ? data : [];
+            
+            // Handle both old format (array) and new format (object)
+            let chronometerArray: ChronometerData[];
+            let loadedSettings: AppSettings;
+            
+            if (Array.isArray(data)) {
+              chronometerArray = data;
+              loadedSettings = defaultSettings;
+            } else if (data.chronometers && Array.isArray(data.chronometers)) {
+              chronometerArray = data.chronometers;
+              loadedSettings = { ...defaultSettings, ...data.settings };
+            } else {
+              chronometerArray = [];
+              loadedSettings = defaultSettings;
+            }
+            
             const withOrder = chronometerArray.map((c, index) => ({
               ...c,
               order: c.order !== undefined ? c.order : index,
@@ -105,6 +157,7 @@ const Index = () => {
               },
             }));
             setChronometers(withOrder);
+            setSettings(loadedSettings);
             console.log('[Chrono] Updated from external source:', withOrder.length, 'chronometers');
           }
         } catch (e) {
@@ -127,7 +180,7 @@ const Index = () => {
     };
   }, []);
 
-  // Save chronometers to Standard Notes
+  // Save chronometers and settings to Standard Notes
   useEffect(() => {
     console.log('[Chrono] Save useEffect triggered');
     console.log('[Chrono] - isInitialized:', isInitialized);
@@ -135,7 +188,11 @@ const Index = () => {
     console.log('[Chrono] - chronometers count:', chronometers.length);
     
     if (isInitialized && connectionStatus === 'connected' && snApiRef.current) {
-      const jsonData = JSON.stringify(chronometers);
+      const appData: AppData = {
+        chronometers,
+        settings,
+      };
+      const jsonData = JSON.stringify(appData);
       console.log('[Chrono] Saving to Standard Notes...');
       console.log('[Chrono] - Data length:', jsonData.length);
       console.log('[Chrono] - Data preview:', jsonData.substring(0, 100));
@@ -153,7 +210,7 @@ const Index = () => {
         hasApi: !!snApiRef.current
       });
     }
-  }, [chronometers, isInitialized, connectionStatus]);
+  }, [chronometers, settings, isInitialized, connectionStatus]);
 
   // Auto-save running chronometers every 5 seconds
   useEffect(() => {
@@ -336,7 +393,11 @@ const Index = () => {
 
   const exportAsJSON = () => {
     const sortedChronometers = [...chronometers].sort((a, b) => a.order - b.order);
-    const dataStr = JSON.stringify(sortedChronometers, null, 2);
+    const appData: AppData = {
+      chronometers: sortedChronometers,
+      settings,
+    };
+    const dataStr = JSON.stringify(appData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
@@ -450,6 +511,29 @@ const Index = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="lg" className="gap-2">
+                <Settings className="h-5 w-5" />
+                Settings
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="flex items-center justify-between px-2 py-3">
+                <label htmlFor="show-stats" className="text-sm cursor-pointer flex-1">
+                  Show Statistics
+                </label>
+                <Switch
+                  id="show-stats"
+                  checked={!settings.hideStatistics}
+                  onCheckedChange={(checked) => 
+                    setSettings(prev => ({ ...prev, hideStatistics: !checked }))
+                  }
+                />
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {chronometers.length === 0 ? (
@@ -474,6 +558,7 @@ const Index = () => {
                 onMoveUp={() => moveChronometer(chronometer.id, 'up')}
                 onMoveDown={() => moveChronometer(chronometer.id, 'down')}
                 onReorder={(newOrder) => reorderChronometer(chronometer.id, newOrder)}
+                hideStatistics={settings.hideStatistics}
               />
             ))}
           </div>

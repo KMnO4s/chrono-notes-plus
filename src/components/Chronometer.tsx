@@ -64,10 +64,11 @@ interface ChronometerProps {
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onReorder?: (newOrder: number) => void;
+  hideStatistics?: boolean;
 }
 
 
-export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder }: ChronometerProps) => {
+export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
@@ -520,7 +521,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
         </div>
 
         {/* Statistics Section */}
-        {chronometer.stats && (
+        {!hideStatistics && chronometer.stats && (
           <>
             <div className="border-t pt-4 mt-4">
               <div className="flex items-center justify-between mb-3">
