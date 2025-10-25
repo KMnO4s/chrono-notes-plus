@@ -2,6 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Play, Pause, Trash2, RotateCcw } from "lucide-react";
 
 export interface ChronometerData {
@@ -126,22 +137,52 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
             )}
           </Button>
 
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            size="lg"
-            disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="lg"
+                disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset Chronometer?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will reset the chronometer to 00:00:00. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleReset}>Reset</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-          <Button
-            onClick={() => onDelete(chronometer.id)}
-            variant="destructive"
-            size="lg"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="lg"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Chronometer?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete this chronometer. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(chronometer.id)}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </Card>
