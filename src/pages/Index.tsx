@@ -100,22 +100,42 @@ const Index = () => {
 
   // Save chronometers to Standard Notes and localStorage
   useEffect(() => {
+    console.log('[Chrono] Save useEffect triggered');
+    console.log('[Chrono] - isInitialized:', isInitialized);
+    console.log('[Chrono] - connectionStatus:', connectionStatus);
+    console.log('[Chrono] - chronometers count:', chronometers.length);
+    console.log('[Chrono] - snApiRef.current exists:', !!snApiRef.current);
+    
     if (isInitialized) {
+      const jsonData = JSON.stringify(chronometers);
+      console.log('[Chrono] - Data to save (length):', jsonData.length);
+      console.log('[Chrono] - Data preview:', jsonData.substring(0, 100));
+      
       // Save to Standard Notes if connected
       if (connectionStatus === 'connected' && snApiRef.current) {
+        console.log('[Chrono] Attempting to save to Standard Notes...');
         try {
-          snApiRef.current.text = JSON.stringify(chronometers);
+          snApiRef.current.text = jsonData;
+          console.log('[Chrono] ✓ Successfully set api.text');
+          console.log('[Chrono] ✓ Current api.text value (length):', snApiRef.current.text?.length || 0);
+          console.log('[Chrono] ✓ Current api.text preview:', snApiRef.current.text?.substring(0, 100) || 'empty');
         } catch (e) {
-          console.error("Failed to save to Standard Notes:", e);
+          console.error('[Chrono] ✗ Failed to save to Standard Notes:', e);
         }
+      } else {
+        console.log('[Chrono] Skipping Standard Notes save:', 
+          connectionStatus !== 'connected' ? `connectionStatus is "${connectionStatus}"` : 'no api ref');
       }
       
       // Always save to localStorage as backup
       try {
-        localStorage.setItem('chronometers', JSON.stringify(chronometers));
+        localStorage.setItem('chronometers', jsonData);
+        console.log('[Chrono] ✓ Saved to localStorage');
       } catch (e) {
-        console.error("Failed to save to localStorage:", e);
+        console.error('[Chrono] ✗ Failed to save to localStorage:', e);
       }
+    } else {
+      console.log('[Chrono] Save skipped - not initialized yet');
     }
   }, [chronometers, isInitialized, connectionStatus]);
 
