@@ -29,7 +29,7 @@ interface AppData {
 const defaultSettings: AppSettings = {
   hideStatistics: false,
   skipResetConfirmation: false,
-  expandAllStats: false,
+  expandAllStats: true,
 };
 
 const Index = () => {
