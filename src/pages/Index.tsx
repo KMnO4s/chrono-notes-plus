@@ -554,6 +554,19 @@ const Index = () => {
                 />
               </div>
               <div className="flex items-center justify-between px-2 py-3 border-t">
+                <label htmlFor="hide-statistics-buttons" className="text-sm cursor-pointer flex-1">
+                  Hide Statistics Buttons
+                </label>
+                <Switch
+                  id="hide-statistics-buttons"
+                  checked={settings.hideStatisticsButtons}
+                  disabled={settings.hideStatistics}
+                  onCheckedChange={(checked) => 
+                    setSettings(prev => ({ ...prev, hideStatisticsButtons: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between px-2 py-3 border-t">
                 <label htmlFor="skip-reset-confirm" className="text-sm cursor-pointer flex-1">
                   Skip Reset Confirmation
                 </label>
@@ -574,19 +587,6 @@ const Index = () => {
                   checked={settings.readOnlyMode}
                   onCheckedChange={(checked) => 
                     setSettings(prev => ({ ...prev, readOnlyMode: checked }))
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between px-2 py-3 border-t">
-                <label htmlFor="hide-statistics-buttons" className="text-sm cursor-pointer flex-1">
-                  Hide Statistics Buttons
-                </label>
-                <Switch
-                  id="hide-statistics-buttons"
-                  checked={settings.hideStatisticsButtons}
-                  disabled={settings.hideStatistics}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ ...prev, hideStatisticsButtons: checked }))
                   }
                 />
               </div>
