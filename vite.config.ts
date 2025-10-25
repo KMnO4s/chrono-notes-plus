@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/chronometer-extension/" : "/",
+  base: mode === "production" ? "/chrono-notes-plus/" : "/",
   server: {
     host: "::",
     port: 8080,
