@@ -66,10 +66,11 @@ interface ChronometerProps {
   onReorder?: (newOrder: number) => void;
   hideStatistics?: boolean;
   skipResetConfirmation?: boolean;
+  expandAllStats?: boolean;
 }
 
 
-export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation }: ChronometerProps) => {
+export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
@@ -78,7 +79,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const [tempOrder, setTempOrder] = useState("");
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
-  const [showStats, setShowStats] = useState(false);
+  const [showStats, setShowStats] = useState(expandAllStats ?? false);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -108,6 +109,11 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
       }
     };
   }, [chronometer.isRunning, chronometer.startTime, chronometer.elapsedTime]);
+
+  // Sync local showStats with global expandAllStats setting
+  useEffect(() => {
+    setShowStats(expandAllStats ?? false);
+  }, [expandAllStats]);
 
   const handleStartPause = () => {
     if (chronometer.isRunning) {

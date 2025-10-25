@@ -18,6 +18,7 @@ import { formatTime, calculateAverageSession } from "@/lib/time-utils";
 interface AppSettings {
   hideStatistics: boolean;
   skipResetConfirmation: boolean;
+  expandAllStats: boolean;
 }
 
 interface AppData {
@@ -28,6 +29,7 @@ interface AppData {
 const defaultSettings: AppSettings = {
   hideStatistics: false,
   skipResetConfirmation: false,
+  expandAllStats: false,
 };
 
 const Index = () => {
@@ -546,6 +548,19 @@ const Index = () => {
                   }
                 />
               </div>
+              <div className="flex items-center justify-between px-2 py-3 border-t">
+                <label htmlFor="expand-all-stats" className="text-sm cursor-pointer flex-1">
+                  Expand All Statistics
+                </label>
+                <Switch
+                  id="expand-all-stats"
+                  checked={settings.expandAllStats}
+                  disabled={settings.hideStatistics}
+                  onCheckedChange={(checked) => 
+                    setSettings(prev => ({ ...prev, expandAllStats: checked }))
+                  }
+                />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -574,6 +589,7 @@ const Index = () => {
                 onReorder={(newOrder) => reorderChronometer(chronometer.id, newOrder)}
                 hideStatistics={settings.hideStatistics}
                 skipResetConfirmation={settings.skipResetConfirmation}
+                expandAllStats={settings.expandAllStats}
               />
             ))}
           </div>
