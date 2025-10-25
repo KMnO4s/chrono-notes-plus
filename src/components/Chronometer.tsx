@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -501,8 +502,17 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 size="lg"
                 onClick={handleReset}
                 disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+                className="relative"
               >
                 <RotateCcw className="h-4 w-4" />
+                {chronometer.stats && chronometer.stats.sessionCount > 0 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
+                  >
+                    {chronometer.stats.sessionCount}
+                  </Badge>
+                )}
               </Button>
             ) : (
               <AlertDialog>
@@ -511,8 +521,17 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                     variant="outline"
                     size="lg"
                     disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+                    className="relative"
                   >
                     <RotateCcw className="h-4 w-4" />
+                    {chronometer.stats && chronometer.stats.sessionCount > 0 && (
+                      <Badge 
+                        variant="secondary" 
+                        className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
+                      >
+                        {chronometer.stats.sessionCount}
+                      </Badge>
+                    )}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
