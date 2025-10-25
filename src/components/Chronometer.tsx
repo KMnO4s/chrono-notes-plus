@@ -13,7 +13,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Play, Pause, Trash2, RotateCcw } from "lucide-react";
+import { Play, Pause, Trash2, RotateCcw, Pencil, Check } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export interface ChronometerData {
   id: string;
@@ -42,7 +43,10 @@ const formatTime = (milliseconds: number): string => {
 
 export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState(chronometer.name);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (chronometer.isRunning && chronometer.startTime) {
@@ -93,19 +97,73 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
     });
   };
 
-  const handleNameChange = (newName: string) => {
-    onUpdate(chronometer.id, { name: newName });
+  const handleStartEdit = () => {
+    setTempName(chronometer.name);
+    setIsEditingName(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleSaveName = () => {
+    const trimmedName = tempName.trim();
+    if (trimmedName && trimmedName !== chronometer.name) {
+      onUpdate(chronometer.id, { name: trimmedName });
+      toast({
+        title: "Name updated",
+        description: `Chronometer renamed to "${trimmedName}"`,
+      });
+    }
+    setIsEditingName(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSaveName();
+    } else if (e.key === "Escape") {
+      setTempName(chronometer.name);
+      setIsEditingName(false);
+    }
   };
 
   return (
     <Card className="p-6 transition-all hover:shadow-lg border-border bg-card">
       <div className="space-y-4">
-        <Input
-          value={chronometer.name}
-          onChange={(e) => handleNameChange(e.target.value)}
-          className="text-lg font-medium border-input bg-background"
-          placeholder="Chronometer name"
-        />
+        <div className="flex items-center gap-2">
+          {isEditingName ? (
+            <>
+              <Input
+                ref={inputRef}
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={handleSaveName}
+                className="text-lg font-medium border-input bg-background flex-1"
+                placeholder="Chronometer name"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSaveName}
+                className="shrink-0"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="text-lg font-medium flex-1 py-2">
+                {chronometer.name}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleStartEdit}
+                className="shrink-0"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
         
         <div 
           className={`text-5xl font-mono font-bold text-center py-6 rounded-lg transition-colors ${
