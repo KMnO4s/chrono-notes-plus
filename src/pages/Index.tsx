@@ -15,127 +15,104 @@ const Index = () => {
   const [showBanner, setShowBanner] = useState(true);
   const snApiRef = useRef(snApi);
 
-  // Initialize Standard Notes API with timeout fallback
+  // Initialize Standard Notes API
   useEffect(() => {
     console.log('[Chrono] useEffect initialization starting');
     
     const api = snApiRef.current;
     let unsubscribe: (() => void) | undefined;
 
-    // Set timeout to prevent infinite waiting
-    const timeout = setTimeout(() => {
-      console.log('[Chrono] Timeout triggered - 3 seconds elapsed');
-      if (!isInitialized) {
-        console.log('[Chrono] Switching to standalone mode (timeout)');
-        setConnectionStatus('standalone');
-        setIsInitialized(true);
-        
-        // Load from localStorage as fallback
-        try {
-          const saved = localStorage.getItem('chronometers');
-          if (saved) {
-            const data = JSON.parse(saved);
-            setChronometers(Array.isArray(data) ? data : []);
-            console.log('[Chrono] Loaded from localStorage:', data.length, 'chronometers');
-          } else {
-            console.log('[Chrono] No localStorage data found');
-          }
-        } catch (e) {
-          console.error('[Chrono] Failed to load from localStorage:', e);
-        }
-      }
-    }, 3000); // 3 second timeout
-
     try {
       console.log('[Chrono] Calling api.initialize()...');
       api.initialize();
       console.log('[Chrono] api.initialize() completed');
+      
+      // Set connection status immediately after successful initialization
+      setConnectionStatus('connected');
+      console.log('[Chrono] Connected to Standard Notes');
+      
+      // Load initial data synchronously
+      try {
+        const noteText = api.text || "";
+        console.log('[Chrono] Initial note text length:', noteText.length);
+        
+        if (noteText) {
+          const data = JSON.parse(noteText);
+          setChronometers(Array.isArray(data) ? data : []);
+          console.log('[Chrono] Loaded from Standard Notes:', Array.isArray(data) ? data.length : 0, 'chronometers');
+        } else {
+          setChronometers([]);
+          console.log('[Chrono] No existing data, starting fresh');
+        }
+      } catch (e) {
+        console.error('[Chrono] Failed to parse initial note data:', e);
+        setChronometers([]);
+      }
+      
+      setIsInitialized(true);
+      console.log('[Chrono] App initialized successfully');
+      
+      // Auto-dismiss success banner after 2 seconds
+      setTimeout(() => setShowBanner(false), 2000);
 
-      // Subscribe to note updates from Standard Notes
-      console.log('[Chrono] Setting up subscription...');
+      // Subscribe to note updates for live syncing
+      console.log('[Chrono] Setting up subscription for live updates...');
       unsubscribe = api.subscribe(() => {
-        console.log('[Chrono] Subscription callback triggered');
+        console.log('[Chrono] Subscription callback - external note update detected');
         try {
-          clearTimeout(timeout);
-          setConnectionStatus('connected');
-          console.log('[Chrono] Connected to Standard Notes successfully');
-          
           const noteText = api.text || "";
-          console.log('[Chrono] Note text length:', noteText.length);
+          console.log('[Chrono] Updated note text length:', noteText.length);
           
           if (noteText) {
             const data = JSON.parse(noteText);
             setChronometers(Array.isArray(data) ? data : []);
-            console.log('[Chrono] Loaded from Standard Notes:', Array.isArray(data) ? data.length : 0, 'chronometers');
-          } else {
-            setChronometers([]);
-            console.log('[Chrono] No data in Standard Notes, starting fresh');
+            console.log('[Chrono] Updated from external source:', Array.isArray(data) ? data.length : 0, 'chronometers');
           }
-          setIsInitialized(true);
-          console.log('[Chrono] App initialized successfully');
-          
-          // Auto-dismiss success banner after 2 seconds
-          setTimeout(() => setShowBanner(false), 2000);
         } catch (e) {
-          console.error('[Chrono] Failed to parse note data:', e);
-          setChronometers([]);
-          setIsInitialized(true);
+          console.error('[Chrono] Failed to parse updated note data:', e);
         }
       });
       console.log('[Chrono] Subscription setup completed');
+      
     } catch (e) {
       console.error('[Chrono] Failed to initialize Standard Notes API:', e);
-      clearTimeout(timeout);
       setConnectionStatus('standalone');
       setIsInitialized(true);
+      setChronometers([]);
       console.log('[Chrono] Switched to standalone mode (error)');
     }
 
     return () => {
       console.log('[Chrono] Cleanup running');
-      clearTimeout(timeout);
       if (unsubscribe) unsubscribe();
     };
-  }, [isInitialized]);
+  }, []);
 
-  // Save chronometers to Standard Notes and localStorage
+  // Save chronometers to Standard Notes
   useEffect(() => {
     console.log('[Chrono] Save useEffect triggered');
     console.log('[Chrono] - isInitialized:', isInitialized);
     console.log('[Chrono] - connectionStatus:', connectionStatus);
     console.log('[Chrono] - chronometers count:', chronometers.length);
-    console.log('[Chrono] - snApiRef.current exists:', !!snApiRef.current);
     
-    if (isInitialized) {
+    if (isInitialized && connectionStatus === 'connected' && snApiRef.current) {
       const jsonData = JSON.stringify(chronometers);
-      console.log('[Chrono] - Data to save (length):', jsonData.length);
+      console.log('[Chrono] Saving to Standard Notes...');
+      console.log('[Chrono] - Data length:', jsonData.length);
       console.log('[Chrono] - Data preview:', jsonData.substring(0, 100));
       
-      // Save to Standard Notes if connected
-      if (connectionStatus === 'connected' && snApiRef.current) {
-        console.log('[Chrono] Attempting to save to Standard Notes...');
-        try {
-          snApiRef.current.text = jsonData;
-          console.log('[Chrono] ✓ Successfully set api.text');
-          console.log('[Chrono] ✓ Current api.text value (length):', snApiRef.current.text?.length || 0);
-          console.log('[Chrono] ✓ Current api.text preview:', snApiRef.current.text?.substring(0, 100) || 'empty');
-        } catch (e) {
-          console.error('[Chrono] ✗ Failed to save to Standard Notes:', e);
-        }
-      } else {
-        console.log('[Chrono] Skipping Standard Notes save:', 
-          connectionStatus !== 'connected' ? `connectionStatus is "${connectionStatus}"` : 'no api ref');
-      }
-      
-      // Always save to localStorage as backup
       try {
-        localStorage.setItem('chronometers', jsonData);
-        console.log('[Chrono] ✓ Saved to localStorage');
+        snApiRef.current.text = jsonData;
+        console.log('[Chrono] ✓ Successfully saved to Standard Notes');
       } catch (e) {
-        console.error('[Chrono] ✗ Failed to save to localStorage:', e);
+        console.error('[Chrono] ✗ Failed to save to Standard Notes:', e);
       }
     } else {
-      console.log('[Chrono] Save skipped - not initialized yet');
+      console.log('[Chrono] Save skipped:', {
+        initialized: isInitialized,
+        status: connectionStatus,
+        hasApi: !!snApiRef.current
+      });
     }
   }, [chronometers, isInitialized, connectionStatus]);
 
