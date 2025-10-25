@@ -45,8 +45,11 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [tempTime, setTempTime] = useState("");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const timeInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (chronometer.isRunning && chronometer.startTime) {
@@ -124,6 +127,62 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
     }
   };
 
+  const handleStartEditTime = () => {
+    setTempTime(formatTime(displayTime));
+    setIsEditingTime(true);
+    setTimeout(() => timeInputRef.current?.focus(), 0);
+  };
+
+  const handleSaveTime = () => {
+    const timePattern = /^(\d{1,2}):(\d{2}):(\d{2})$/;
+    const match = tempTime.match(timePattern);
+    
+    if (!match) {
+      toast({
+        title: "Invalid format",
+        description: "Please use HH:MM:SS format",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const seconds = parseInt(match[3]);
+
+    if (minutes >= 60 || seconds >= 60) {
+      toast({
+        title: "Invalid time",
+        description: "Minutes and seconds must be less than 60",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newElapsedTime = (hours * 3600 + minutes * 60 + seconds) * 1000;
+    
+    onUpdate(chronometer.id, {
+      elapsedTime: newElapsedTime,
+      isRunning: false,
+      startTime: null,
+    });
+
+    toast({
+      title: "Time updated",
+      description: `Chronometer set to ${tempTime}`,
+    });
+
+    setIsEditingTime(false);
+  };
+
+  const handleTimeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSaveTime();
+    } else if (e.key === "Escape") {
+      setIsEditingTime(false);
+    }
+  };
+
   return (
     <Card className="p-6 transition-all hover:shadow-lg border-border bg-card">
       <div className="space-y-4">
@@ -164,14 +223,48 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
           )}
         </div>
         
-        <div 
-          className={`text-5xl font-mono font-bold text-center py-6 rounded-lg transition-colors ${
-            chronometer.isRunning 
-              ? "text-primary" 
-              : "text-muted-foreground"
-          }`}
-        >
-          {formatTime(displayTime)}
+        <div className="flex items-center justify-center gap-2">
+          {isEditingTime ? (
+            <>
+              <Input
+                ref={timeInputRef}
+                value={tempTime}
+                onChange={(e) => setTempTime(e.target.value)}
+                onKeyDown={handleTimeKeyDown}
+                className="text-4xl font-mono font-bold text-center py-6 max-w-xs"
+                placeholder="HH:MM:SS"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSaveTime}
+                className="shrink-0"
+              >
+                <Check className="h-5 w-5" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <div 
+                className={`text-5xl font-mono font-bold text-center py-6 rounded-lg transition-colors ${
+                  chronometer.isRunning 
+                    ? "text-primary" 
+                    : "text-muted-foreground"
+                }`}
+              >
+                {formatTime(displayTime)}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleStartEditTime}
+                disabled={chronometer.isRunning}
+                className="shrink-0"
+              >
+                <Pencil className="h-5 w-5" />
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="flex gap-2 justify-center">
