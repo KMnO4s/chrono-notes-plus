@@ -267,7 +267,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
 
   return (
     <Card 
-      className="p-6 pt-12 transition-all hover:shadow-lg border-border bg-card relative"
+      className={`p-6 transition-all hover:shadow-lg border-border bg-card relative ${readOnlyMode ? '' : 'pt-12'}`}
       style={{
         borderLeftWidth: '4px',
         borderLeftColor: `hsl(${currentColor.hsl})`,
