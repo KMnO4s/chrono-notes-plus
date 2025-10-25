@@ -10,11 +10,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useSNThemeSync } from "@/hooks/use-sn-theme";
 import snApi from "sn-extension-api";
 
 const Index = () => {
   console.log('[Chrono] Component rendering');
+  
+  // Sync theme with Standard Notes
+  useSNThemeSync();
   
   const [chronometers, setChronometers] = useState<ChronometerData[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -359,10 +362,7 @@ const Index = () => {
           </Alert>
         )}
 
-        <header className="mb-8 text-center relative">
-          <div className="absolute top-0 right-0">
-            <ThemeToggle />
-          </div>
+        <header className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
             <Timer className="h-10 w-10 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">Multi-Chronometer</h1>
