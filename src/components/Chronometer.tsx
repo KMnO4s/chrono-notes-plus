@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Play, Pause, Trash2, RotateCcw, Pencil, Check } from "lucide-react";
+import { Play, Pause, Trash2, RotateCcw, Pencil, Check, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 export interface ChronometerData {
@@ -22,12 +22,17 @@ export interface ChronometerData {
   startTime: number | null;
   elapsedTime: number;
   isRunning: boolean;
+  order: number;
 }
 
 interface ChronometerProps {
   chronometer: ChronometerData;
   onUpdate: (id: string, updates: Partial<ChronometerData>) => void;
   onDelete: (id: string) => void;
+  totalCount: number;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onReorder?: (newOrder: number) => void;
 }
 
 const formatTime = (milliseconds: number): string => {
@@ -41,15 +46,18 @@ const formatTime = (milliseconds: number): string => {
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 };
 
-export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProps) => {
+export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
   const [isEditingTime, setIsEditingTime] = useState(false);
   const [tempTime, setTempTime] = useState("");
+  const [isEditingOrder, setIsEditingOrder] = useState(false);
+  const [tempOrder, setTempOrder] = useState("");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
+  const orderInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (chronometer.isRunning && chronometer.startTime) {
@@ -183,8 +191,95 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
     }
   };
 
+  const handleSaveOrder = () => {
+    const newOrder = parseInt(tempOrder);
+    
+    if (isNaN(newOrder) || newOrder < 1 || newOrder > totalCount) {
+      toast({
+        title: "Invalid position",
+        description: `Please enter a number between 1 and ${totalCount}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (onReorder) {
+      onReorder(newOrder - 1);
+    }
+    
+    setIsEditingOrder(false);
+  };
+
+  const handleOrderKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSaveOrder();
+    } else if (e.key === "Escape") {
+      setIsEditingOrder(false);
+    }
+  };
+
   return (
-    <Card className="p-6 transition-all hover:shadow-lg border-border bg-card">
+    <Card className="p-6 pt-12 transition-all hover:shadow-lg border-border bg-card relative">
+      <div className="absolute top-2 left-2 flex items-center gap-1">
+        {isEditingOrder ? (
+          <>
+            <Input
+              ref={orderInputRef}
+              value={tempOrder}
+              onChange={(e) => setTempOrder(e.target.value)}
+              onKeyDown={handleOrderKeyDown}
+              type="number"
+              min="1"
+              max={totalCount}
+              className="w-16 h-8 text-sm text-center"
+              placeholder="#"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSaveOrder}
+              className="h-8 w-8"
+            >
+              <Check className="h-3 w-3" />
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setTempOrder(String(chronometer.order + 1));
+              setIsEditingOrder(true);
+              setTimeout(() => orderInputRef.current?.focus(), 0);
+            }}
+            className="h-7 px-2 text-xs font-mono"
+          >
+            #{chronometer.order + 1}
+          </Button>
+        )}
+      </div>
+
+      <div className="absolute top-2 right-2 flex gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onMoveUp}
+          disabled={chronometer.order === 0}
+          className="h-8 w-8"
+        >
+          <ChevronUp className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onMoveDown}
+          disabled={chronometer.order === totalCount - 1}
+          className="h-8 w-8"
+        >
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           {isEditingName ? (

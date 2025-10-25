@@ -38,8 +38,13 @@ const Index = () => {
         
         if (noteText) {
           const data = JSON.parse(noteText);
-          setChronometers(Array.isArray(data) ? data : []);
-          console.log('[Chrono] Loaded from Standard Notes:', Array.isArray(data) ? data.length : 0, 'chronometers');
+          const chronometerArray = Array.isArray(data) ? data : [];
+          const withOrder = chronometerArray.map((c, index) => ({
+            ...c,
+            order: c.order !== undefined ? c.order : index,
+          }));
+          setChronometers(withOrder);
+          console.log('[Chrono] Loaded from Standard Notes:', withOrder.length, 'chronometers');
         } else {
           setChronometers([]);
           console.log('[Chrono] No existing data, starting fresh');
@@ -65,8 +70,13 @@ const Index = () => {
           
           if (noteText) {
             const data = JSON.parse(noteText);
-            setChronometers(Array.isArray(data) ? data : []);
-            console.log('[Chrono] Updated from external source:', Array.isArray(data) ? data.length : 0, 'chronometers');
+            const chronometerArray = Array.isArray(data) ? data : [];
+            const withOrder = chronometerArray.map((c, index) => ({
+              ...c,
+              order: c.order !== undefined ? c.order : index,
+            }));
+            setChronometers(withOrder);
+            console.log('[Chrono] Updated from external source:', withOrder.length, 'chronometers');
           }
         } catch (e) {
           console.error('[Chrono] Failed to parse updated note data:', e);
@@ -163,6 +173,7 @@ const Index = () => {
       startTime: null,
       elapsedTime: 0,
       isRunning: false,
+      order: chronometers.length,
     };
     setChronometers([...chronometers, newChronometer]);
     toast({
@@ -178,10 +189,75 @@ const Index = () => {
   };
 
   const deleteChronometer = (id: string) => {
-    setChronometers(chronometers.filter((c) => c.id !== id));
+    const sortedChronometers = [...chronometers].sort((a, b) => a.order - b.order);
+    const deletedIndex = sortedChronometers.findIndex(c => c.id === id);
+    
+    const updatedChronometers = chronometers
+      .filter((c) => c.id !== id)
+      .map(c => {
+        if (c.order > sortedChronometers[deletedIndex].order) {
+          return { ...c, order: c.order - 1 };
+        }
+        return c;
+      });
+    
+    setChronometers(updatedChronometers);
     toast({
       title: "Chronometer deleted",
       description: "Chronometer removed successfully",
+    });
+  };
+
+  const moveChronometer = (id: string, direction: 'up' | 'down') => {
+    setChronometers(prevChronometers => {
+      const sortedChronometers = [...prevChronometers].sort((a, b) => a.order - b.order);
+      const currentIndex = sortedChronometers.findIndex(c => c.id === id);
+      
+      if (currentIndex === -1) return prevChronometers;
+      
+      const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      
+      if (newIndex < 0 || newIndex >= sortedChronometers.length) {
+        return prevChronometers;
+      }
+      
+      const temp = sortedChronometers[currentIndex].order;
+      sortedChronometers[currentIndex].order = sortedChronometers[newIndex].order;
+      sortedChronometers[newIndex].order = temp;
+      
+      toast({
+        title: "Order updated",
+        description: `Moved ${direction}`,
+      });
+      
+      return sortedChronometers;
+    });
+  };
+
+  const reorderChronometer = (id: string, newOrder: number) => {
+    setChronometers(prevChronometers => {
+      const sortedChronometers = [...prevChronometers].sort((a, b) => a.order - b.order);
+      const currentIndex = sortedChronometers.findIndex(c => c.id === id);
+      
+      if (currentIndex === -1 || newOrder === currentIndex) {
+        return prevChronometers;
+      }
+      
+      const chronometer = sortedChronometers[currentIndex];
+      
+      sortedChronometers.splice(currentIndex, 1);
+      sortedChronometers.splice(newOrder, 0, chronometer);
+      
+      sortedChronometers.forEach((c, index) => {
+        c.order = index;
+      });
+      
+      toast({
+        title: "Order updated",
+        description: `Moved to position ${newOrder + 1}`,
+      });
+      
+      return sortedChronometers;
     });
   };
 
@@ -242,12 +318,16 @@ const Index = () => {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-            {chronometers.map((chronometer) => (
+            {[...chronometers].sort((a, b) => a.order - b.order).map((chronometer) => (
               <Chronometer
                 key={chronometer.id}
                 chronometer={chronometer}
                 onUpdate={updateChronometer}
                 onDelete={deleteChronometer}
+                totalCount={chronometers.length}
+                onMoveUp={() => moveChronometer(chronometer.id, 'up')}
+                onMoveDown={() => moveChronometer(chronometer.id, 'down')}
+                onReorder={(newOrder) => reorderChronometer(chronometer.id, newOrder)}
               />
             ))}
           </div>
