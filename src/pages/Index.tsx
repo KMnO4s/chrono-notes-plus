@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Chronometer, ChronometerData } from "@/components/Chronometer";
-import { Plus, Timer, X } from "lucide-react";
+import { Plus, Timer, X, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import snApi from "sn-extension-api";
 
 const Index = () => {
@@ -264,6 +270,66 @@ const Index = () => {
     });
   };
 
+  const formatTime = (milliseconds: number): string => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const exportAsJSON = () => {
+    const sortedChronometers = [...chronometers].sort((a, b) => a.order - b.order);
+    const dataStr = JSON.stringify(sortedChronometers, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `chronometers-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Export successful",
+      description: "Chronometers exported as JSON",
+    });
+  };
+
+  const exportAsCSV = () => {
+    const sortedChronometers = [...chronometers].sort((a, b) => a.order - b.order);
+    
+    const headers = ['Order', 'Name', 'Time', 'Status', 'Color'];
+    const rows = sortedChronometers.map(c => [
+      c.order + 1,
+      c.name,
+      formatTime(c.elapsedTime),
+      c.isRunning ? 'Running' : 'Paused',
+      c.color || 'blue'
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const dataBlob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `chronometers-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Export successful",
+      description: "Chronometers exported as CSV",
+    });
+  };
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -302,11 +368,28 @@ const Index = () => {
           </p>
         </header>
 
-        <div className="mb-8 flex justify-center">
+        <div className="mb-8 flex justify-center gap-3">
           <Button onClick={addChronometer} size="lg" className="gap-2">
             <Plus className="h-5 w-5" />
             Add Chronometer
           </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="lg" className="gap-2" disabled={chronometers.length === 0}>
+                <Download className="h-5 w-5" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={exportAsJSON}>
+                Export as JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportAsCSV}>
+                Export as CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {chronometers.length === 0 ? (
