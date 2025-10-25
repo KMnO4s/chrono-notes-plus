@@ -116,6 +116,46 @@ const Index = () => {
     }
   }, [chronometers, isInitialized, connectionStatus]);
 
+  // Auto-save running chronometers every 5 seconds
+  useEffect(() => {
+    const hasRunningChronometers = chronometers.some(c => c.isRunning);
+    
+    if (!hasRunningChronometers || !isInitialized) {
+      return; // No interval needed if no timers are running
+    }
+
+    console.log('[Chrono] Setting up auto-save interval for running chronometers');
+    
+    const autoSaveInterval = setInterval(() => {
+      console.log('[Chrono] Auto-save triggered');
+      
+      setChronometers(prevChronometers => {
+        const now = Date.now();
+        let hasChanges = false;
+        
+        const updated = prevChronometers.map(c => {
+          if (c.isRunning && c.startTime) {
+            hasChanges = true;
+            const currentElapsed = c.elapsedTime + (now - c.startTime);
+            return {
+              ...c,
+              elapsedTime: currentElapsed,
+              startTime: now, // Reset startTime to now for next calculation
+            };
+          }
+          return c;
+        });
+        
+        return hasChanges ? updated : prevChronometers;
+      });
+    }, 5000); // Every 5 seconds
+
+    return () => {
+      console.log('[Chrono] Clearing auto-save interval');
+      clearInterval(autoSaveInterval);
+    };
+  }, [chronometers, isInitialized]);
+
   const addChronometer = () => {
     const newChronometer: ChronometerData = {
       id: Date.now().toString(),
