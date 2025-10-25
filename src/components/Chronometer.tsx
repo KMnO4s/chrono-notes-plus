@@ -68,10 +68,11 @@ interface ChronometerProps {
   skipResetConfirmation?: boolean;
   expandAllStats?: boolean;
   readOnlyMode?: boolean;
+  hideStatisticsButtons?: boolean;
 }
 
 
-export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats, readOnlyMode }: ChronometerProps) => {
+export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats, readOnlyMode, hideStatisticsButtons }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
@@ -561,14 +562,16 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
             <div className="border-t pt-4 mt-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-muted-foreground">Statistics</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowStats(!showStats)}
-                  className="h-7 text-xs"
-                >
-                  {showStats ? 'Hide' : 'Show'}
-                </Button>
+                {!hideStatisticsButtons && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowStats(!showStats)}
+                    className="h-7 text-xs"
+                  >
+                    {showStats ? 'Hide' : 'Show'}
+                  </Button>
+                )}
               </div>
               
               {showStats && (
@@ -590,16 +593,18 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 </div>
               )}
               
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowStatsDialog(true)}
-                className="w-full"
-                disabled={chronometer.stats.sessionCount === 0}
-              >
-                <BarChart2 className="h-4 w-4 mr-2" />
-                View Detailed Statistics
-              </Button>
+              {!hideStatisticsButtons && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowStatsDialog(true)}
+                  className="w-full"
+                  disabled={chronometer.stats.sessionCount === 0}
+                >
+                  <BarChart2 className="h-4 w-4 mr-2" />
+                  View Detailed Statistics
+                </Button>
+              )}
             </div>
 
             <StatisticsDialog

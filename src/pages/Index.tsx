@@ -20,6 +20,7 @@ interface AppSettings {
   skipResetConfirmation: boolean;
   expandAllStats: boolean;
   readOnlyMode: boolean;
+  hideStatisticsButtons: boolean;
 }
 
 interface AppData {
@@ -32,6 +33,7 @@ const defaultSettings: AppSettings = {
   skipResetConfirmation: false,
   expandAllStats: true,
   readOnlyMode: false,
+  hideStatisticsButtons: false,
 };
 
 const Index = () => {
@@ -575,6 +577,19 @@ const Index = () => {
                   }
                 />
               </div>
+              <div className="flex items-center justify-between px-2 py-3 border-t">
+                <label htmlFor="hide-statistics-buttons" className="text-sm cursor-pointer flex-1">
+                  Hide Statistics Buttons
+                </label>
+                <Switch
+                  id="hide-statistics-buttons"
+                  checked={settings.hideStatisticsButtons}
+                  disabled={settings.hideStatistics}
+                  onCheckedChange={(checked) => 
+                    setSettings(prev => ({ ...prev, hideStatisticsButtons: checked }))
+                  }
+                />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -605,6 +620,7 @@ const Index = () => {
                 skipResetConfirmation={settings.skipResetConfirmation}
                 expandAllStats={settings.expandAllStats}
                 readOnlyMode={settings.readOnlyMode}
+                hideStatisticsButtons={settings.hideStatisticsButtons}
               />
             ))}
           </div>
