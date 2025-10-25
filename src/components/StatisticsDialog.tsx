@@ -34,7 +34,7 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] w-[95vw] sm:w-full">
+      <DialogContent className="h-[100dvh] w-full max-w-full p-6 sm:h-auto sm:max-h-[80vh] sm:max-w-2xl sm:rounded-lg">
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-2xl">Statistics for "{chronometer.name}"</DialogTitle>
           <DialogDescription className="text-sm">
