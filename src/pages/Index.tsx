@@ -537,18 +537,6 @@ const Index = () => {
                 />
               </div>
               <div className="flex items-center justify-between px-2 py-3 border-t">
-                <label htmlFor="skip-reset-confirm" className="text-sm cursor-pointer flex-1">
-                  Skip Reset Confirmation
-                </label>
-                <Switch
-                  id="skip-reset-confirm"
-                  checked={settings.skipResetConfirmation}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ ...prev, skipResetConfirmation: checked }))
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between px-2 py-3 border-t">
                 <label htmlFor="expand-all-stats" className="text-sm cursor-pointer flex-1">
                   Expand All Statistics
                 </label>
@@ -558,6 +546,18 @@ const Index = () => {
                   disabled={settings.hideStatistics}
                   onCheckedChange={(checked) => 
                     setSettings(prev => ({ ...prev, expandAllStats: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between px-2 py-3 border-t">
+                <label htmlFor="skip-reset-confirm" className="text-sm cursor-pointer flex-1">
+                  Skip Reset Confirmation
+                </label>
+                <Switch
+                  id="skip-reset-confirm"
+                  checked={settings.skipResetConfirmation}
+                  onCheckedChange={(checked) => 
+                    setSettings(prev => ({ ...prev, skipResetConfirmation: checked }))
                   }
                 />
               </div>
