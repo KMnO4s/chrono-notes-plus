@@ -490,16 +490,16 @@ const Index = () => {
         </header>
 
         <div className="mb-8 flex justify-center gap-3">
-          <Button onClick={addChronometer} size="lg" className="gap-2">
+          <Button onClick={addChronometer} size="lg" className="gap-0 sm:gap-2">
             <Plus className="h-5 w-5" />
-            Add Chronometer
+            <span className="hidden sm:inline">Add Chronometer</span>
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="lg" className="gap-2" disabled={chronometers.length === 0}>
+              <Button variant="outline" size="lg" className="gap-0 sm:gap-2" disabled={chronometers.length === 0}>
                 <Download className="h-5 w-5" />
-                Export
+                <span className="hidden sm:inline">Export</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -514,9 +514,9 @@ const Index = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="lg" className="gap-2">
+              <Button variant="outline" size="lg" className="gap-0 sm:gap-2">
                 <Settings className="h-5 w-5" />
-                Settings
+                <span className="hidden sm:inline">Settings</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
