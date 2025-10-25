@@ -149,7 +149,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Reset Chronometer?</AlertDialogTitle>
+                <AlertDialogTitle>Reset "{chronometer.name}"?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This will reset the chronometer to 00:00:00. This action cannot be undone.
                 </AlertDialogDescription>
@@ -172,7 +172,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete }: ChronometerProp
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete Chronometer?</AlertDialogTitle>
+                <AlertDialogTitle>Delete "{chronometer.name}"?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This will permanently delete this chronometer. This action cannot be undone.
                 </AlertDialogDescription>
