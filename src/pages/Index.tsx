@@ -19,6 +19,7 @@ interface AppSettings {
   hideStatistics: boolean;
   skipResetConfirmation: boolean;
   expandAllStats: boolean;
+  readOnlyMode: boolean;
 }
 
 interface AppData {
@@ -30,6 +31,7 @@ const defaultSettings: AppSettings = {
   hideStatistics: false,
   skipResetConfirmation: false,
   expandAllStats: true,
+  readOnlyMode: false,
 };
 
 const Index = () => {
@@ -561,6 +563,18 @@ const Index = () => {
                   }
                 />
               </div>
+              <div className="flex items-center justify-between px-2 py-3 border-t">
+                <label htmlFor="read-only-mode" className="text-sm cursor-pointer flex-1">
+                  Read-Only Mode
+                </label>
+                <Switch
+                  id="read-only-mode"
+                  checked={settings.readOnlyMode}
+                  onCheckedChange={(checked) => 
+                    setSettings(prev => ({ ...prev, readOnlyMode: checked }))
+                  }
+                />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -590,6 +604,7 @@ const Index = () => {
                 hideStatistics={settings.hideStatistics}
                 skipResetConfirmation={settings.skipResetConfirmation}
                 expandAllStats={settings.expandAllStats}
+                readOnlyMode={settings.readOnlyMode}
               />
             ))}
           </div>

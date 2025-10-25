@@ -67,10 +67,11 @@ interface ChronometerProps {
   hideStatistics?: boolean;
   skipResetConfirmation?: boolean;
   expandAllStats?: boolean;
+  readOnlyMode?: boolean;
 }
 
 
-export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats }: ChronometerProps) => {
+export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats, readOnlyMode }: ChronometerProps) => {
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
@@ -273,108 +274,116 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
       }}
     >
       <div className="absolute top-2 left-2 flex items-center gap-1">
-        {isEditingOrder ? (
+        {!readOnlyMode && (
           <>
-            <Input
-              ref={orderInputRef}
-              value={tempOrder}
-              onChange={(e) => setTempOrder(e.target.value)}
-              onKeyDown={handleOrderKeyDown}
-              type="number"
-              min="1"
-              max={totalCount}
-              className="w-16 h-8 text-sm text-center"
-              placeholder="#"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSaveOrder}
-              className="h-8 w-8"
-            >
-              <Check className="h-3 w-3" />
-            </Button>
+            {isEditingOrder ? (
+              <>
+                <Input
+                  ref={orderInputRef}
+                  value={tempOrder}
+                  onChange={(e) => setTempOrder(e.target.value)}
+                  onKeyDown={handleOrderKeyDown}
+                  type="number"
+                  min="1"
+                  max={totalCount}
+                  className="w-16 h-8 text-sm text-center"
+                  placeholder="#"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleSaveOrder}
+                  className="h-8 w-8"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setTempOrder(String(chronometer.order + 1));
+                  setIsEditingOrder(true);
+                  setTimeout(() => orderInputRef.current?.focus(), 0);
+                }}
+                className="h-7 px-2 text-xs font-mono"
+              >
+                #{chronometer.order + 1}
+              </Button>
+            )}
+            
+            {/* Color picker */}
+            <Popover open={isColorPickerOpen} onOpenChange={setIsColorPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  style={{ borderColor: `hsl(${currentColor.hsl})` }}
+                >
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: `hsl(${currentColor.hsl})` }}
+                  />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-3" align="start">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium mb-2">Choose color</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {CHRONOMETER_COLORS.map((color) => (
+                      <Button
+                        key={color.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleColorChange(color.id)}
+                        className="h-10 w-full p-1 flex flex-col items-center gap-1"
+                        style={{
+                          borderColor: chronometer.color === color.id 
+                            ? `hsl(${color.hsl})` 
+                            : 'transparent',
+                          borderWidth: chronometer.color === color.id ? '2px' : '1px',
+                        }}
+                      >
+                        <div
+                          className="w-6 h-6 rounded-full"
+                          style={{ backgroundColor: `hsl(${color.hsl})` }}
+                        />
+                        <span className="text-xs">{color.name}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setTempOrder(String(chronometer.order + 1));
-              setIsEditingOrder(true);
-              setTimeout(() => orderInputRef.current?.focus(), 0);
-            }}
-            className="h-7 px-2 text-xs font-mono"
-          >
-            #{chronometer.order + 1}
-          </Button>
         )}
-        
-        {/* Color picker */}
-        <Popover open={isColorPickerOpen} onOpenChange={setIsColorPickerOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 w-7 p-0"
-              style={{ borderColor: `hsl(${currentColor.hsl})` }}
-            >
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: `hsl(${currentColor.hsl})` }}
-              />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48 p-3" align="start">
-            <div className="space-y-2">
-              <p className="text-sm font-medium mb-2">Choose color</p>
-              <div className="grid grid-cols-3 gap-2">
-                {CHRONOMETER_COLORS.map((color) => (
-                  <Button
-                    key={color.id}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleColorChange(color.id)}
-                    className="h-10 w-full p-1 flex flex-col items-center gap-1"
-                    style={{
-                      borderColor: chronometer.color === color.id 
-                        ? `hsl(${color.hsl})` 
-                        : 'transparent',
-                      borderWidth: chronometer.color === color.id ? '2px' : '1px',
-                    }}
-                  >
-                    <div
-                      className="w-6 h-6 rounded-full"
-                      style={{ backgroundColor: `hsl(${color.hsl})` }}
-                    />
-                    <span className="text-xs">{color.name}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
       </div>
 
       <div className="absolute top-2 right-2 flex gap-1">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onMoveUp}
-          disabled={chronometer.order === 0}
-          className="h-8 w-8"
-        >
-          <ChevronUp className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onMoveDown}
-          disabled={chronometer.order === totalCount - 1}
-          className="h-8 w-8"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </Button>
+        {!readOnlyMode && (
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onMoveUp}
+              disabled={chronometer.order === 0}
+              className="h-8 w-8"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onMoveDown}
+              disabled={chronometer.order === totalCount - 1}
+              className="h-8 w-8"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </>
+        )}
       </div>
 
       <div className="space-y-4">
@@ -403,14 +412,16 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               <div className="text-lg font-medium flex-1 py-2">
                 {chronometer.name}
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleStartEdit}
-                className="shrink-0"
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
+              {!readOnlyMode && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleStartEdit}
+                  className="shrink-0"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
             </>
           )}
         </div>
@@ -446,97 +457,103 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               >
                 {formatTime(displayTime)}
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleStartEditTime}
-                disabled={chronometer.isRunning}
-                className="shrink-0"
-              >
-                <Pencil className="h-5 w-5" />
-              </Button>
+              {!readOnlyMode && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleStartEditTime}
+                  disabled={chronometer.isRunning}
+                  className="shrink-0"
+                >
+                  <Pencil className="h-5 w-5" />
+                </Button>
+              )}
             </>
           )}
         </div>
 
-        <div className="flex gap-2 justify-center">
-          <Button
-            onClick={handleStartPause}
-            variant={chronometer.isRunning ? "secondary" : "default"}
-            size="lg"
-            className="flex-1"
-          >
-            {chronometer.isRunning ? (
-              <>
-                <Pause className="mr-2 h-4 w-4" />
-                Pause
-              </>
-            ) : (
-              <>
-                <Play className="mr-2 h-4 w-4" />
-                Start
-              </>
-            )}
-          </Button>
 
-          {skipResetConfirmation ? (
+        {!readOnlyMode && (
+          <div className="flex gap-2 justify-center">
             <Button
-              variant="outline"
+              onClick={handleStartPause}
+              variant={chronometer.isRunning ? "secondary" : "default"}
               size="lg"
-              onClick={handleReset}
-              disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+              className="flex-1"
             >
-              <RotateCcw className="h-4 w-4" />
+              {chronometer.isRunning ? (
+                <>
+                  <Pause className="mr-2 h-4 w-4" />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  Start
+                </>
+              )}
             </Button>
-          ) : (
+
+            {skipResetConfirmation ? (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleReset}
+                disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            ) : (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset "{chronometer.name}"?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will reset the chronometer to 00:00:00. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleReset}>Reset</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   size="lg"
-                  disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
                 >
-                  <RotateCcw className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Reset "{chronometer.name}"?</AlertDialogTitle>
+                  <AlertDialogTitle>Delete "{chronometer.name}"?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will reset the chronometer to 00:00:00. This action cannot be undone.
+                    This will permanently delete this chronometer. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleReset}>Reset</AlertDialogAction>
+                  <AlertDialogAction onClick={() => onDelete(chronometer.id)}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          )}
+          </div>
+        )}
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                size="lg"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete "{chronometer.name}"?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete this chronometer. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(chronometer.id)}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
 
         {/* Statistics Section */}
         {!hideStatistics && chronometer.stats && (
