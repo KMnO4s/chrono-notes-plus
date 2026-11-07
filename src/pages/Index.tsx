@@ -141,8 +141,6 @@ const Index = () => {
       setIsInitialized(true);
       console.log('[Chrono] App initialized successfully');
       
-      // Auto-dismiss success banner after 2 seconds
-      setTimeout(() => setShowBanner(false), 2000);
 
       // Subscribe to note updates for live syncing
       console.log('[Chrono] Setting up subscription for live updates...');
