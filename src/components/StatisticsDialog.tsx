@@ -37,7 +37,7 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[100dvh] w-full max-w-full p-6 sm:h-auto sm:max-h-[80vh] sm:max-w-2xl sm:rounded-lg">
+      <DialogContent className="flex flex-col overflow-hidden h-[100dvh] w-full max-w-full p-6 sm:h-auto sm:max-h-[80vh] sm:max-w-2xl sm:rounded-lg">
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-2xl">{t('Statistics for "{name}"', { name: chronometer.name })}</DialogTitle>
           <DialogDescription className="text-sm">
@@ -45,7 +45,7 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col flex-1 min-h-0 space-y-4 sm:space-y-6">
           {/* Summary Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-3 sm:p-4 rounded-lg bg-muted/50">
@@ -96,14 +96,14 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
           )}
 
           {/* Session History */}
-          <div>
+          <div className="flex flex-col flex-1 min-h-0">
             <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">{t("Session History")}</h3>
             {stats.sessions.length === 0 ? (
               <p className="text-center text-muted-foreground py-8 text-sm">
                 {t("No completed sessions yet")}
               </p>
             ) : (
-              <ScrollArea className="h-[250px] sm:h-[300px] rounded-md border">
+              <ScrollArea className="flex-1 min-h-[150px] rounded-md border">
                 <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                   {Object.entries(groupedSessions)
                     .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
