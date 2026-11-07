@@ -18,6 +18,7 @@ const french = {
   "Hide Statistics Buttons": "Masquer les boutons des statistiques",
   "Skip Reset Confirmation": "Désactiver la confirmation de remise à zéro",
   "Read-Only Mode": "Lecture seule",
+  "Hide Edit Buttons": "Masquer les boutons de modification",
   "No chronometers yet": "Aucun chronomètre pour le moment",
   "Click \"Add Chronometer\" to create your first timer": "Ajoutez votre premier chronomètre",
   "Chronometer added": "Chronomètre ajouté",
@@ -107,10 +108,12 @@ const french = {
 export type TranslationKey = keyof typeof french;
 export const createTranslator = (language: Language) => (key: TranslationKey, values: Record<string, string | number> = {}): string => {
   const text = language === "fr" ? french[key] : key;
-  return text.replace(/\{(\w+)\}/g, (match, name: string) => String(values[name] ?? match));
+  const filled = text.replace(/\{(\w+)\}/g, (match, name: string) => String(values[name] ?? match));
+  return language === "fr" ? filled.replace(/ ([:;?!])/g, "\u00A0$1") : filled;
 };
+export const colon = (language: Language) => language === "fr" ? "\u00A0:" : ":";
 export const LanguageContext = createContext<Language>(DEFAULT_LANGUAGE);
 export const useLanguage = () => {
   const language = useContext(LanguageContext);
-  return { language, locale: languageLocale(language), t: createTranslator(language) };
+  return { language, locale: languageLocale(language), t: createTranslator(language), colon: colon(language) };
 };
