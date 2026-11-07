@@ -520,7 +520,7 @@ const Index = () => {
         </header>
 
         <div className="mb-8 flex justify-center gap-3">
-          <Button onClick={addChronometer} aria-label={t("Add Chronometer")} size="lg" aria-label={t("Settings")} className="gap-0 sm:gap-2">
+          <Button onClick={addChronometer} aria-label={t("Add Chronometer")} size="lg" className="gap-0 sm:gap-2">
             <Plus className="h-5 w-5" />
             <span className="hidden sm:inline">{t("Add Chronometer")}</span>
           </Button>

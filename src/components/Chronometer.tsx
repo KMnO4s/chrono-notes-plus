@@ -87,7 +87,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [showStats, setShowStats] = useState(expandAllStats ?? false);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const timeInputRef = useRef<HTMLInputElement | null>(null);
   const orderInputRef = useRef<HTMLInputElement | null>(null);
@@ -555,7 +555,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t('Reset "{name}"?', { name: chronometer.name })}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will reset the chronometer to 00:00:00. This action cannot be undone.
+                      {t("This will reset the chronometer to 00:00:00. This action cannot be undone.")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -580,7 +580,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 <AlertDialogHeader>
                   <AlertDialogTitle>{t('Delete "{name}"?', { name: chronometer.name })}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete this chronometer. This action cannot be undone.
+                    {t("This will permanently delete this chronometer. This action cannot be undone.")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
