@@ -1,0 +1,2 @@
+# Architecture
+- Keep interface translations in a shared language context and dictionary; persist the selected language in the existing Standard Notes settings so all views use the same note-level preference.
