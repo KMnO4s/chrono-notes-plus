@@ -289,8 +289,8 @@ const Index = () => {
     };
     setChronometers([...chronometers, newChronometer]);
     toast({
-      title: "Chronometer added",
-      description: "New chronometer created successfully",
+      title: t("Chronometer added"),
+      description: t("New chronometer created successfully"),
     });
   };
 
@@ -350,8 +350,8 @@ const Index = () => {
     
     setChronometers(updatedChronometers);
     toast({
-      title: "Chronometer deleted",
-      description: "Chronometer removed successfully",
+      title: t("Chronometer deleted"),
+      description: t("Chronometer removed successfully"),
     });
   };
 
@@ -373,7 +373,7 @@ const Index = () => {
       sortedChronometers[newIndex].order = temp;
       
       toast({
-        title: "Order updated",
+        title: t("Order updated"),
         description: `Moved ${direction}`,
       });
       
@@ -400,7 +400,7 @@ const Index = () => {
       });
       
       toast({
-        title: "Order updated",
+        title: t("Order updated"),
         description: `Moved to position ${newOrder + 1}`,
       });
       
@@ -427,8 +427,8 @@ const Index = () => {
     URL.revokeObjectURL(url);
     
     toast({
-      title: "Export successful",
-      description: "Chronometers exported as JSON",
+      title: t("Export successful"),
+      description: t("Chronometers exported as JSON"),
     });
   };
 
@@ -445,7 +445,7 @@ const Index = () => {
       formatTime(c.stats?.totalTime || 0),
       c.stats?.sessionCount || 0,
       formatTime(calculateAverageSession(c.stats?.sessions || [])),
-      c.stats?.lastUsed ? new Date(c.stats.lastUsed).toLocaleString() : 'Never'
+      c.stats?.lastUsed ? new Date(c.stats.lastUsed).toLocaleString() : t("Never")
     ]);
     
     const csvContent = [
@@ -464,8 +464,8 @@ const Index = () => {
     URL.revokeObjectURL(url);
     
     toast({
-      title: "Export successful",
-      description: "Chronometers exported as CSV",
+      title: t("Export successful"),
+      description: t("Chronometers exported as CSV"),
     });
   };
 
@@ -482,7 +482,7 @@ const Index = () => {
                 ) : connectionStatus === 'standalone' ? (
                   <span className="text-yellow-700 dark:text-yellow-400">⚠️ Running in standalone mode - changes won't sync to Standard Notes</span>
                 ) : (
-                  <span className="text-muted-foreground">Connecting to Standard Notes...</span>
+                  <span className="text-muted-foreground">{t("Connecting to Standard Notes...")}</span>
                 )}
               </span>
               <Button
@@ -500,32 +500,32 @@ const Index = () => {
         <header className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
             <Timer className="h-10 w-10 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground">Multi-Chronometer</h1>
+            <h1 className="text-4xl font-bold text-foreground">{t("Multi-Chronometer")}</h1>
           </div>
           <p className="text-muted-foreground text-lg">
-            Track multiple timers simultaneously with precision
+            {t("Track multiple timers simultaneously with precision")}
           </p>
         </header>
 
         <div className="mb-8 flex justify-center gap-3">
           <Button onClick={addChronometer} size="lg" className="gap-0 sm:gap-2">
             <Plus className="h-5 w-5" />
-            <span className="hidden sm:inline">Add Chronometer</span>
+            <span className="hidden sm:inline">{t("Add Chronometer")}</span>
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="lg" className="gap-0 sm:gap-2" disabled={chronometers.length === 0}>
                 <Download className="h-5 w-5" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="hidden sm:inline">{t("Export")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={exportAsJSON}>
-                Export as JSON
+                {t("Export as JSON")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={exportAsCSV}>
-                Export as CSV
+                {t("Export as CSV")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -534,13 +534,13 @@ const Index = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="lg" className="gap-0 sm:gap-2">
                 <Settings className="h-5 w-5" />
-                <span className="hidden sm:inline">Settings</span>
+                <span className="hidden sm:inline">{t("Settings")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex items-center justify-between px-2 py-3">
                 <label htmlFor="show-stats" className="text-sm cursor-pointer flex-1">
-                  Show Statistics
+                  {t("Show Statistics")}
                 </label>
                 <Switch
                   id="show-stats"
@@ -552,7 +552,7 @@ const Index = () => {
               </div>
               <div className="flex items-center justify-between px-2 py-3 border-t">
                 <label htmlFor="expand-all-stats" className="text-sm cursor-pointer flex-1">
-                  Expand All Statistics
+                  {t("Expand All Statistics")}
                 </label>
                 <Switch
                   id="expand-all-stats"
@@ -565,7 +565,7 @@ const Index = () => {
               </div>
               <div className="flex items-center justify-between px-2 py-3 border-t">
                 <label htmlFor="hide-statistics-buttons" className="text-sm cursor-pointer flex-1">
-                  Hide Statistics Buttons
+                  {t("Hide Statistics Buttons")}
                 </label>
                 <Switch
                   id="hide-statistics-buttons"
@@ -578,7 +578,7 @@ const Index = () => {
               </div>
               <div className="flex items-center justify-between px-2 py-3 border-t">
                 <label htmlFor="skip-reset-confirm" className="text-sm cursor-pointer flex-1">
-                  Skip Reset Confirmation
+                  {t("Skip Reset Confirmation")}
                 </label>
                 <Switch
                   id="skip-reset-confirm"
@@ -590,7 +590,7 @@ const Index = () => {
               </div>
               <div className="flex items-center justify-between px-2 py-3 border-t">
                 <label htmlFor="read-only-mode" className="text-sm cursor-pointer flex-1">
-                  Read-Only Mode
+                  {t("Read-Only Mode")}
                 </label>
                 <Switch
                   id="read-only-mode"
@@ -608,10 +608,10 @@ const Index = () => {
           <div className="text-center py-16">
             <Timer className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h2 className="text-2xl font-semibold text-foreground mb-2">
-              No chronometers yet
+              {t("No chronometers yet")}
             </h2>
             <p className="text-muted-foreground mb-6">
-              Click "Add Chronometer" to create your first timer
+              {t("Click \"Add Chronometer\" to create your first timer")}
             </p>
           </div>
         ) : (

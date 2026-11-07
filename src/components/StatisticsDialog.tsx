@@ -38,7 +38,7 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-2xl">Statistics for "{chronometer.name}"</DialogTitle>
           <DialogDescription className="text-sm">
-            Detailed session history and usage statistics
+            {t("Detailed session history and usage statistics")}
           </DialogDescription>
         </DialogHeader>
 
@@ -48,7 +48,7 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
             <div className="p-3 sm:p-4 rounded-lg bg-muted/50">
               <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-1">
                 <Clock className="h-4 w-4" />
-                Total Time
+                {t("Total Time")}
               </div>
               <div className="text-xl sm:text-2xl font-bold">{formatTime(stats.totalTime)}</div>
             </div>
@@ -56,23 +56,23 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
             <div className="p-3 sm:p-4 rounded-lg bg-muted/50">
               <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-1">
                 <TrendingUp className="h-4 w-4" />
-                Sessions
+                {t("Sessions")}
               </div>
               <div className="text-xl sm:text-2xl font-bold">{stats.sessionCount}</div>
             </div>
             
             <div className="p-3 sm:p-4 rounded-lg bg-muted/50">
-              <div className="text-xs sm:text-sm text-muted-foreground mb-1">Average</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mb-1">{t("Average")}</div>
               <div className="text-xl sm:text-2xl font-bold">{formatTime(avgSession)}</div>
             </div>
             
             <div className="p-3 sm:p-4 rounded-lg bg-muted/50">
               <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-1">
                 <Calendar className="h-4 w-4" />
-                Last Used
+                {t("Last Used")}
               </div>
               <div className="text-xs sm:text-sm font-medium">
-                {stats.lastUsed ? formatRelativeTime(stats.lastUsed) : 'Never'}
+                {stats.lastUsed ? formatRelativeTime(stats.lastUsed) : t("Never")}
               </div>
             </div>
           </div>
@@ -81,12 +81,12 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
           {stats.sessionCount > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="p-3 rounded-lg border">
-                <div className="text-xs sm:text-sm text-muted-foreground mb-1">Longest Session</div>
+                <div className="text-xs sm:text-sm text-muted-foreground mb-1">{t("Longest Session")}</div>
                 <div className="text-base sm:text-lg font-semibold">{formatTime(longestSession)}</div>
               </div>
               
               <div className="p-3 rounded-lg border">
-                <div className="text-xs sm:text-sm text-muted-foreground mb-1">Shortest Session</div>
+                <div className="text-xs sm:text-sm text-muted-foreground mb-1">{t("Shortest Session")}</div>
                 <div className="text-base sm:text-lg font-semibold">{formatTime(shortestSession)}</div>
               </div>
             </div>
@@ -94,10 +94,10 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
 
           {/* Session History */}
           <div>
-            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Session History</h3>
+            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">{t("Session History")}</h3>
             {stats.sessions.length === 0 ? (
               <p className="text-center text-muted-foreground py-8 text-sm">
-                No completed sessions yet
+                {t("No completed sessions yet")}
               </p>
             ) : (
               <ScrollArea className="h-[250px] sm:h-[300px] rounded-md border">

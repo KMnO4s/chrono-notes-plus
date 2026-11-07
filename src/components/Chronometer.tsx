@@ -159,7 +159,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     if (trimmedName && trimmedName !== chronometer.name) {
       onUpdate(chronometer.id, { name: trimmedName });
       toast({
-        title: "Name updated",
+        title: t("Name updated"),
         description: `Chronometer renamed to "${trimmedName}"`,
       });
     }
@@ -187,8 +187,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     
     if (!match) {
       toast({
-        title: "Invalid format",
-        description: "Please use HH:MM:SS format (hours can be any number)",
+        title: t("Invalid format"),
+        description: t("Please use HH:MM:SS format (hours can be any number)"),
         variant: "destructive",
       });
       return;
@@ -200,8 +200,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
 
     if (minutes >= 60 || seconds >= 60) {
       toast({
-        title: "Invalid time",
-        description: "Minutes and seconds must be less than 60",
+        title: t("Invalid time"),
+        description: t("Minutes and seconds must be less than 60"),
         variant: "destructive",
       });
       return;
@@ -216,7 +216,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     });
 
     toast({
-      title: "Time updated",
+      title: t("Time updated"),
       description: `Chronometer set to ${tempTime}`,
     });
 
@@ -236,7 +236,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     
     if (isNaN(newOrder) || newOrder < 1 || newOrder > totalCount) {
       toast({
-        title: "Invalid position",
+        title: t("Invalid position"),
         description: `Please enter a number between 1 and ${totalCount}`,
         variant: "destructive",
       });
@@ -262,7 +262,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     onUpdate(chronometer.id, { color: colorId });
     setIsColorPickerOpen(false);
     toast({
-      title: "Color updated",
+      title: t("Color updated"),
       description: `Chronometer color changed to ${CHRONOMETER_COLORS.find(c => c.id === colorId)?.name}`,
     });
   };
@@ -332,7 +332,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               </PopoverTrigger>
               <PopoverContent className="w-48 p-3" align="start">
                 <div className="space-y-2">
-                  <p className="text-sm font-medium mb-2">Choose color</p>
+                  <p className="text-sm font-medium mb-2">{t("Choose color")}</p>
                   <div className="grid grid-cols-3 gap-2">
                     {CHRONOMETER_COLORS.map((color) => (
                       <Button
@@ -398,7 +398,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 onChange={(e) => setTempName(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="text-lg font-medium border-input bg-background flex-1"
-                placeholder="Chronometer name"
+                placeholder={t("Chronometer name")}
               />
               <Button
                 variant="ghost"
@@ -486,12 +486,12 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               {chronometer.isRunning ? (
                 <>
                   <Pause className="mr-2 h-4 w-4" />
-                  Pause
+                  {t("Pause")}
                 </>
               ) : (
                 <>
                   <Play className="mr-2 h-4 w-4" />
-                  Start
+                  {t("Start")}
                 </>
               )}
             </Button>
@@ -542,8 +542,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleReset}>Reset</AlertDialogAction>
+                    <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleReset}>{t("Reset")}</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -566,8 +566,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onDelete(chronometer.id)}>Delete</AlertDialogAction>
+                  <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDelete(chronometer.id)}>{t("Delete")}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -580,7 +580,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
           <>
             <div className="border-t pt-4 mt-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-muted-foreground">Statistics</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground">{t("Statistics")}</h3>
                 {!hideStatisticsButtons && (
                   <Button
                     variant="ghost"
@@ -588,7 +588,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                     onClick={() => setShowStats(!showStats)}
                     className="h-7 text-xs"
                   >
-                    {showStats ? 'Hide' : 'Show'}
+                    {showStats ? t("Hide") : t("Show")}
                   </Button>
                 )}
               </div>
@@ -606,7 +606,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Last used:</span>
                     <span className="font-medium">
-                      {chronometer.stats.lastUsed ? formatRelativeTime(chronometer.stats.lastUsed) : 'Never'}
+                      {chronometer.stats.lastUsed ? formatRelativeTime(chronometer.stats.lastUsed) : t("Never")}
                     </span>
                   </div>
                 </div>
@@ -621,7 +621,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                   disabled={chronometer.stats.sessionCount === 0}
                 >
                   <BarChart2 className="h-4 w-4 mr-2" />
-                  View Detailed Statistics
+                  {t("View Detailed Statistics")}
                 </Button>
               )}
             </div>
