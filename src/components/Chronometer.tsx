@@ -71,12 +71,13 @@ interface ChronometerProps {
   skipResetConfirmation?: boolean;
   expandAllStats?: boolean;
   readOnlyMode?: boolean;
+  hideEditButtons?: boolean;
   hideStatisticsButtons?: boolean;
 }
 
 
-export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats, readOnlyMode, hideStatisticsButtons }: ChronometerProps) => {
-  const { t, language } = useLanguage();
+export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats, readOnlyMode, hideStatisticsButtons, hideEditButtons }: ChronometerProps) => {
+  const { t, language, colon } = useLanguage();
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
@@ -425,7 +426,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               <div className="text-lg font-medium flex-1 py-2">
                 {chronometer.name}
               </div>
-              {!readOnlyMode && (
+              {!readOnlyMode && !hideEditButtons && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -474,7 +475,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               >
                 {formatTime(displayTime)}
               </div>
-              {!readOnlyMode && (
+              {!readOnlyMode && !hideEditButtons && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -614,15 +615,15 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               {showStats && (
                 <div className="space-y-2 mb-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{t("Total Time")}:</span>
+                    <span className="text-muted-foreground">{t("Total Time")}{colon}</span>
                     <span className="font-medium font-mono">{formatTime(chronometer.stats.totalTime)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{t("Sessions")}:</span>
+                    <span className="text-muted-foreground">{t("Sessions")}{colon}</span>
                     <span className="font-medium">{chronometer.stats.sessionCount}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{t("Last Used")}:</span>
+                    <span className="text-muted-foreground">{t("Last Used")}{colon}</span>
                     <span className="font-medium">
                       {chronometer.stats.lastUsed ? formatRelativeTime(chronometer.stats.lastUsed, language) : t("Never")}
                     </span>
