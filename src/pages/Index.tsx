@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Chronometer, ChronometerData } from "@/components/Chronometer";
-import { Plus, Timer, X, Download, Settings, Upload } from "lucide-react";
+import { Plus, Timer, Download, Settings, Upload, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,7 +65,7 @@ const Index = () => {
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'standalone'>('checking');
-  const [showBanner, setShowBanner] = useState(true);
+
   const snApiRef = useRef(snApi);
 
   // Initialize Standard Notes API
@@ -483,42 +482,6 @@ const Index = () => {
     <LanguageContext.Provider value={settings.language}>
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Connection Status Banner */}
-        {showBanner && (
-          <Alert className={`mb-4 ${connectionStatus === 'connected' ? 'border-green-500/50 bg-green-500/10' : 'border-yellow-500/50 bg-yellow-500/10'}`}>
-            <AlertDescription className="flex items-center justify-between">
-              <span>
-                {connectionStatus === 'connected' ? (
-                  <span className="text-green-700 dark:text-green-400">✓ {t("Connected to Standard Notes")}</span>
-                ) : connectionStatus === 'standalone' ? (
-                  <span className="text-yellow-700 dark:text-yellow-400">⚠️ {t("Running in standalone mode - changes won't sync to Standard Notes")}</span>
-                ) : (
-                  <span className="text-muted-foreground">{t("Connecting to Standard Notes...")}</span>
-                )}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={t("Close")}
-                onClick={() => setShowBanner(false)}
-                className="h-6 w-6 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <header className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Timer className="h-10 w-10 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground">{t("Multi-Chronometer")}</h1>
-          </div>
-          <p className="text-muted-foreground text-lg">
-            {t("Track multiple timers simultaneously with precision")}
-          </p>
-        </header>
-
         <div className="mb-8 flex justify-center gap-3">
           <Button onClick={addChronometer} aria-label={t("Add Chronometer")} size="lg" className="gap-0 sm:gap-2">
             <Plus className="h-5 w-5" />
@@ -618,6 +581,28 @@ const Index = () => {
                   <SelectTrigger aria-labelledby="language-label"><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="fr">Français</SelectItem><SelectItem value="en">English</SelectItem></SelectContent>
                 </Select>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="lg" aria-label={connectionStatus === 'connected' ? t("Connected to Standard Notes") : connectionStatus === 'standalone' ? t("Running in standalone mode - changes won't sync to Standard Notes") : t("Connecting to Standard Notes...")} className="px-3">
+                {connectionStatus === 'connected' ? (
+                  <CheckCircle2 className="h-5 w-5 text-[hsl(var(--chrono-green))]" />
+                ) : connectionStatus === 'standalone' ? (
+                  <AlertTriangle className="h-5 w-5 text-[hsl(var(--chrono-yellow))]" />
+                ) : (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-w-[calc(100vw-2rem)]">
+              <div className="px-3 py-2 text-sm">
+                {connectionStatus === 'connected'
+                  ? t("Connected to Standard Notes")
+                  : connectionStatus === 'standalone'
+                  ? t("Running in standalone mode - changes won't sync to Standard Notes")
+                  : t("Connecting to Standard Notes...")}
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
