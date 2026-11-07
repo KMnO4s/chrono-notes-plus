@@ -1,6 +1,9 @@
-import { Session } from "@/components/Chronometer";
+import type { Session } from "@/components/Chronometer";
 
-export function formatRelativeTime(timestamp: number): string {
+import { Language, createTranslator, languageLocale } from "./i18n";
+
+export function formatRelativeTime(timestamp: number, language: Language = "en"): string {
+  const t = createTranslator(language);
   const now = Date.now();
   const diff = now - timestamp;
   
@@ -8,11 +11,11 @@ export function formatRelativeTime(timestamp: number): string {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
   
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return new Date(timestamp).toLocaleDateString();
+  if (minutes < 1) return t("Just now");
+  if (minutes < 60) return t("{number}m ago", { number: minutes });
+  if (hours < 24) return t("{number}h ago", { number: hours });
+  if (days < 7) return t("{number}d ago", { number: days });
+  return new Date(timestamp).toLocaleDateString(languageLocale(language));
 }
 
 export function calculateAverageSession(sessions: Session[]): number {
@@ -21,9 +24,9 @@ export function calculateAverageSession(sessions: Session[]): number {
   return total / sessions.length;
 }
 
-export function groupSessionsByDate(sessions: Session[]): Record<string, Session[]> {
+export function groupSessionsByDate(sessions: Session[], _language: Language = "en"): Record<string, Session[]> {
   return sessions.reduce((groups, session) => {
-    const date = new Date(session.completedAt).toLocaleDateString();
+    const date = new Date(session.completedAt).toLocaleDateString("en-CA");
     if (!groups[date]) groups[date] = [];
     groups[date].push(session);
     return groups;

@@ -10,6 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatTime, formatRelativeTime, calculateAverageSession, groupSessionsByDate } from "@/lib/time-utils";
 import { Calendar, Clock, TrendingUp } from "lucide-react";
 
+import { useLanguage } from "@/lib/i18n";
+
 interface StatisticsDialogProps {
   chronometer: ChronometerData;
   open: boolean;
@@ -17,13 +19,14 @@ interface StatisticsDialogProps {
 }
 
 export const StatisticsDialog = ({ chronometer, open, onOpenChange }: StatisticsDialogProps) => {
+  const { t, language, locale } = useLanguage();
   const stats = chronometer.stats;
   
   if (!stats) {
     return null;
   }
 
-  const groupedSessions = groupSessionsByDate(stats.sessions);
+  const groupedSessions = groupSessionsByDate(stats.sessions, language);
   const avgSession = calculateAverageSession(stats.sessions);
   const longestSession = stats.sessions.length > 0 
     ? Math.max(...stats.sessions.map(s => s.duration))
@@ -36,7 +39,7 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-[100dvh] w-full max-w-full p-6 sm:h-auto sm:max-h-[80vh] sm:max-w-2xl sm:rounded-lg">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-2xl">Statistics for "{chronometer.name}"</DialogTitle>
+          <DialogTitle className="text-lg sm:text-2xl">{t('Statistics for "{name}"', { name: chronometer.name })}</DialogTitle>
           <DialogDescription className="text-sm">
             {t("Detailed session history and usage statistics")}
           </DialogDescription>
@@ -72,7 +75,7 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
                 {t("Last Used")}
               </div>
               <div className="text-xs sm:text-sm font-medium">
-                {stats.lastUsed ? formatRelativeTime(stats.lastUsed) : t("Never")}
+                {stats.lastUsed ? formatRelativeTime(stats.lastUsed, language) : t("Never")}
               </div>
             </div>
           </div>
@@ -105,9 +108,9 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
                   {Object.entries(groupedSessions)
                     .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
                     .map(([date, sessions]) => (
-                      <div key={date}>
+                      <div key={new Date(date).toLocaleDateString(locale)}>
                         <h4 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2 sticky top-0 bg-background">
-                          {date}
+                          {new Date(date).toLocaleDateString(locale)}
                         </h4>
                         <div className="space-y-2">
                           {sessions
@@ -122,11 +125,11 @@ export const StatisticsDialog = ({ chronometer, open, onOpenChange }: Statistics
                                     {formatTime(session.duration)}
                                   </div>
                                   <div className="text-xs sm:text-sm text-muted-foreground truncate">
-                                    {new Date(session.startTime).toLocaleTimeString()} - {new Date(session.endTime).toLocaleTimeString()}
+                                    {new Date(session.startTime).toLocaleTimeString(locale)} - {new Date(session.endTime).toLocaleTimeString(locale)}
                                   </div>
                                 </div>
                                 <div className="text-xs text-muted-foreground sm:text-right whitespace-nowrap">
-                                  {formatRelativeTime(session.completedAt)}
+                                  {formatRelativeTime(session.completedAt, language)}
                                 </div>
                               </div>
                             ))}

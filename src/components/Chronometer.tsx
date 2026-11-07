@@ -20,6 +20,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { StatisticsDialog } from "./StatisticsDialog";
 import { formatTime, formatRelativeTime } from "@/lib/time-utils";
 
+import { useLanguage } from "@/lib/i18n";
+
 export interface Session {
   id: string;
   startTime: number;
@@ -74,6 +76,7 @@ interface ChronometerProps {
 
 
 export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMoveUp, onMoveDown, onReorder, hideStatistics, skipResetConfirmation, expandAllStats, readOnlyMode, hideStatisticsButtons }: ChronometerProps) => {
+  const { t, language } = useLanguage();
   const [displayTime, setDisplayTime] = useState(chronometer.elapsedTime);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(chronometer.name);
@@ -95,7 +98,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     if (chronometer.isRunning && chronometer.startTime) {
       intervalRef.current = setInterval(() => {
         const now = Date.now();
-        const elapsed = chronometer.elapsedTime + (now - chronometer.startTime!);
+        const elapsed = chronometer.elapsedTime + (now - (chronometer.startTime ?? now));
         setDisplayTime(elapsed);
       }, 10);
     } else {
@@ -122,7 +125,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     if (chronometer.isRunning) {
       // Pause
       const now = Date.now();
-      const newElapsed = chronometer.elapsedTime + (now - chronometer.startTime!);
+      const newElapsed = chronometer.elapsedTime + (now - (chronometer.startTime ?? now));
       onUpdate(chronometer.id, {
         isRunning: false,
         elapsedTime: newElapsed,
@@ -160,7 +163,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
       onUpdate(chronometer.id, { name: trimmedName });
       toast({
         title: t("Name updated"),
-        description: `Chronometer renamed to "${trimmedName}"`,
+        description: t('Chronometer renamed to "{name}"', { name: trimmedName }),
       });
     }
     setIsEditingName(false);
@@ -217,7 +220,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
 
     toast({
       title: t("Time updated"),
-      description: `Chronometer set to ${tempTime}`,
+      description: t("Chronometer set to {time}", { time: tempTime }),
     });
 
     setIsEditingTime(false);
@@ -237,7 +240,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     if (isNaN(newOrder) || newOrder < 1 || newOrder > totalCount) {
       toast({
         title: t("Invalid position"),
-        description: `Please enter a number between 1 and ${totalCount}`,
+        description: t("Please enter a number between 1 and {number}", { number: totalCount }),
         variant: "destructive",
       });
       return;
@@ -263,7 +266,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
     setIsColorPickerOpen(false);
     toast({
       title: t("Color updated"),
-      description: `Chronometer color changed to ${CHRONOMETER_COLORS.find(c => c.id === colorId)?.name}`,
+      description: t("Chronometer color changed to {color}", { color: t(CHRONOMETER_COLORS.find(c => c.id === colorId)?.name ?? "Blue") }),
     });
   };
 
@@ -294,6 +297,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={t("Save")}
+                  title={t("Save")}
                   onClick={handleSaveOrder}
                   className="h-8 w-8"
                 >
@@ -309,7 +314,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                   setIsEditingOrder(true);
                   setTimeout(() => orderInputRef.current?.focus(), 0);
                 }}
-                className="h-7 px-2 text-xs font-mono"
+                aria-label={t("Edit position")} title={t("Edit position")} className="h-7 px-2 text-xs font-mono"
               >
                 #{chronometer.order + 1}
               </Button>
@@ -321,7 +326,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 w-7 p-0"
+                  aria-label={t("Choose color")} title={t("Choose color")} className="h-7 w-7 p-0"
                   style={{ borderColor: `hsl(${currentColor.hsl})` }}
                 >
                   <div
@@ -352,7 +357,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                           className="w-6 h-6 rounded-full"
                           style={{ backgroundColor: `hsl(${color.hsl})` }}
                         />
-                        <span className="text-xs">{color.name}</span>
+                        <span className="text-xs">{t(color.name)}</span>
                       </Button>
                     ))}
                   </div>
@@ -369,7 +374,9 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
             <Button
               variant="outline"
               size="icon"
-              onClick={onMoveUp}
+              aria-label={t("Move up")}
+                  title={t("Move up")}
+                  onClick={onMoveUp}
               disabled={chronometer.order === 0}
               className="h-8 w-8"
             >
@@ -378,7 +385,9 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
             <Button
               variant="outline"
               size="icon"
-              onClick={onMoveDown}
+              aria-label={t("Move down")}
+                  title={t("Move down")}
+                  onClick={onMoveDown}
               disabled={chronometer.order === totalCount - 1}
               className="h-8 w-8"
             >
@@ -403,7 +412,9 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleSaveName}
+                aria-label={t("Save")}
+                  title={t("Save")}
+                  onClick={handleSaveName}
                 className="shrink-0"
               >
                 <Check className="h-4 w-4" />
@@ -418,6 +429,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={t("Edit name")}
+                  title={t("Edit name")}
                   onClick={handleStartEdit}
                   className="shrink-0"
                 >
@@ -442,7 +455,9 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleSaveTime}
+                aria-label={t("Save")}
+                  title={t("Save")}
+                  onClick={handleSaveTime}
                 className="shrink-0"
               >
                 <Check className="h-5 w-5" />
@@ -463,6 +478,8 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={t("Edit time")}
+                  title={t("Edit time")}
                   onClick={handleStartEditTime}
                   disabled={chronometer.isRunning}
                   className="shrink-0"
@@ -502,7 +519,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 size="lg"
                 onClick={handleReset}
                 disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
-                className="relative"
+                aria-label={t("Reset")} title={t("Reset")} className="relative"
               >
                 <RotateCcw className="h-4 w-4" />
                 {chronometer.stats && chronometer.stats.sessionCount > 0 && (
@@ -521,7 +538,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                     variant="outline"
                     size="lg"
                     disabled={chronometer.elapsedTime === 0 && !chronometer.isRunning}
-                    className="relative"
+                    aria-label={t("Reset")} title={t("Reset")} className="relative"
                   >
                     <RotateCcw className="h-4 w-4" />
                     {chronometer.stats && chronometer.stats.sessionCount > 0 && (
@@ -536,7 +553,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Reset "{chronometer.name}"?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('Reset "{name}"?', { name: chronometer.name })}</AlertDialogTitle>
                     <AlertDialogDescription>
                       This will reset the chronometer to 00:00:00. This action cannot be undone.
                     </AlertDialogDescription>
@@ -553,6 +570,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               <AlertDialogTrigger asChild>
                 <Button
                   variant="destructive"
+                  aria-label={t("Delete")} title={t("Delete")}
                   size="lg"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -560,7 +578,7 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete "{chronometer.name}"?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('Delete "{name}"?', { name: chronometer.name })}</AlertDialogTitle>
                   <AlertDialogDescription>
                     This will permanently delete this chronometer. This action cannot be undone.
                   </AlertDialogDescription>
@@ -596,17 +614,17 @@ export const Chronometer = ({ chronometer, onUpdate, onDelete, totalCount, onMov
               {showStats && (
                 <div className="space-y-2 mb-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Total Time:</span>
+                    <span className="text-muted-foreground">{t("Total Time")}:</span>
                     <span className="font-medium font-mono">{formatTime(chronometer.stats.totalTime)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Sessions:</span>
+                    <span className="text-muted-foreground">{t("Sessions")}:</span>
                     <span className="font-medium">{chronometer.stats.sessionCount}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Last used:</span>
+                    <span className="text-muted-foreground">{t("Last Used")}:</span>
                     <span className="font-medium">
-                      {chronometer.stats.lastUsed ? formatRelativeTime(chronometer.stats.lastUsed) : t("Never")}
+                      {chronometer.stats.lastUsed ? formatRelativeTime(chronometer.stats.lastUsed, language) : t("Never")}
                     </span>
                   </div>
                 </div>

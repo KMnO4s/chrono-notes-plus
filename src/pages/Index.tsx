@@ -25,7 +25,11 @@ import { useSNThemeSync } from "@/hooks/use-sn-theme";
 import snApi from "sn-extension-api";
 import { formatTime, calculateAverageSession } from "@/lib/time-utils";
 
+import { Language, LanguageContext, createTranslator, normalizeLanguage, DEFAULT_LANGUAGE, languageLocale } from "@/lib/i18n";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface AppSettings {
+  language: Language;
   hideStatistics: boolean;
   skipResetConfirmation: boolean;
   expandAllStats: boolean;
@@ -39,6 +43,7 @@ interface AppData {
 }
 
 const defaultSettings: AppSettings = {
+  language: DEFAULT_LANGUAGE,
   hideStatistics: false,
   skipResetConfirmation: false,
   expandAllStats: true,
@@ -54,6 +59,11 @@ const Index = () => {
   
   const [chronometers, setChronometers] = useState<ChronometerData[]>([]);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
+  const t = createTranslator(settings.language);
+  const locale = languageLocale(settings.language);
+
+  useEffect(() => { document.documentElement.lang = settings.language; }, [settings.language]);
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'standalone'>('checking');
   const [showBanner, setShowBanner] = useState(true);
@@ -95,7 +105,7 @@ const Index = () => {
           } else if (data.chronometers && Array.isArray(data.chronometers)) {
             // New format: object with chronometers and settings
             chronometerArray = data.chronometers;
-            loadedSettings = { ...defaultSettings, ...data.settings };
+            loadedSettings = { ...defaultSettings, ...data.settings, language: normalizeLanguage(data.settings?.language) };
             console.log('[Chrono] Loaded new format data');
           } else {
             chronometerArray = [];
@@ -155,7 +165,7 @@ const Index = () => {
               loadedSettings = defaultSettings;
             } else if (data.chronometers && Array.isArray(data.chronometers)) {
               chronometerArray = data.chronometers;
-              loadedSettings = { ...defaultSettings, ...data.settings };
+              loadedSettings = { ...defaultSettings, ...data.settings, language: normalizeLanguage(data.settings?.language) };
             } else {
               chronometerArray = [];
               loadedSettings = defaultSettings;
@@ -273,7 +283,7 @@ const Index = () => {
   const addChronometer = () => {
     const newChronometer: ChronometerData = {
       id: Date.now().toString(),
-      name: `Timer ${chronometers.length + 1}`,
+      name: t("Timer {number}", { number: chronometers.length + 1 }),
       startTime: null,
       elapsedTime: 0,
       isRunning: false,
@@ -374,7 +384,7 @@ const Index = () => {
       
       toast({
         title: t("Order updated"),
-        description: `Moved ${direction}`,
+        description: t("Moved {direction}", { direction: t(direction) }),
       });
       
       return sortedChronometers;
@@ -401,7 +411,7 @@ const Index = () => {
       
       toast({
         title: t("Order updated"),
-        description: `Moved to position ${newOrder + 1}`,
+        description: t("Moved to position {number}", { number: newOrder + 1 }),
       });
       
       return sortedChronometers;
@@ -435,17 +445,17 @@ const Index = () => {
   const exportAsCSV = () => {
     const sortedChronometers = [...chronometers].sort((a, b) => a.order - b.order);
     
-    const headers = ['Order', 'Name', 'Current Time', 'Status', 'Color', 'Total Time', 'Sessions', 'Avg Session', 'Last Used'];
+    const headers = [t("Order"), t("Name"), t("Current Time"), t("Status"), t("Color"), t("Total Time"), t("Sessions"), t("Avg Session"), t("Last Used")];
     const rows = sortedChronometers.map(c => [
       c.order + 1,
       c.name,
       formatTime(c.elapsedTime),
-      c.isRunning ? 'Running' : 'Paused',
+      c.isRunning ? t("Running") : t("Paused"),
       c.color || 'blue',
       formatTime(c.stats?.totalTime || 0),
       c.stats?.sessionCount || 0,
       formatTime(calculateAverageSession(c.stats?.sessions || [])),
-      c.stats?.lastUsed ? new Date(c.stats.lastUsed).toLocaleString() : t("Never")
+      c.stats?.lastUsed ? new Date(c.stats.lastUsed).toLocaleString(locale) : t("Never")
     ]);
     
     const csvContent = [
@@ -470,6 +480,7 @@ const Index = () => {
   };
 
   return (
+    <LanguageContext.Provider value={settings.language}>
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Connection Status Banner */}
@@ -478,9 +489,9 @@ const Index = () => {
             <AlertDescription className="flex items-center justify-between">
               <span>
                 {connectionStatus === 'connected' ? (
-                  <span className="text-green-700 dark:text-green-400">✓ Connected to Standard Notes</span>
+                  <span className="text-green-700 dark:text-green-400">✓ {t("Connected to Standard Notes")}</span>
                 ) : connectionStatus === 'standalone' ? (
-                  <span className="text-yellow-700 dark:text-yellow-400">⚠️ Running in standalone mode - changes won't sync to Standard Notes</span>
+                  <span className="text-yellow-700 dark:text-yellow-400">⚠️ {t("Running in standalone mode - changes won't sync to Standard Notes")}</span>
                 ) : (
                   <span className="text-muted-foreground">{t("Connecting to Standard Notes...")}</span>
                 )}
@@ -488,6 +499,7 @@ const Index = () => {
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label={t("Close")}
                 onClick={() => setShowBanner(false)}
                 className="h-6 w-6 p-0"
               >
@@ -508,14 +520,14 @@ const Index = () => {
         </header>
 
         <div className="mb-8 flex justify-center gap-3">
-          <Button onClick={addChronometer} size="lg" className="gap-0 sm:gap-2">
+          <Button onClick={addChronometer} aria-label={t("Add Chronometer")} size="lg" aria-label={t("Settings")} className="gap-0 sm:gap-2">
             <Plus className="h-5 w-5" />
             <span className="hidden sm:inline">{t("Add Chronometer")}</span>
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="lg" className="gap-0 sm:gap-2" disabled={chronometers.length === 0}>
+              <Button variant="outline" size="lg" aria-label={t("Export")} className="gap-0 sm:gap-2" disabled={chronometers.length === 0}>
                 <Download className="h-5 w-5" />
                 <span className="hidden sm:inline">{t("Export")}</span>
               </Button>
@@ -532,14 +544,14 @@ const Index = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="lg" className="gap-0 sm:gap-2">
+              <Button variant="outline" size="lg" aria-label={t("Settings")} className="gap-0 sm:gap-2">
                 <Settings className="h-5 w-5" />
                 <span className="hidden sm:inline">{t("Settings")}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="flex items-center justify-between px-2 py-3">
-                <label htmlFor="show-stats" className="text-sm cursor-pointer flex-1">
+            <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)]">
+              <div className="flex items-center justify-between gap-3 px-2 py-3">
+                <label htmlFor="show-stats" className="text-sm cursor-pointer flex-1 min-w-0">
                   {t("Show Statistics")}
                 </label>
                 <Switch
@@ -550,8 +562,8 @@ const Index = () => {
                   }
                 />
               </div>
-              <div className="flex items-center justify-between px-2 py-3 border-t">
-                <label htmlFor="expand-all-stats" className="text-sm cursor-pointer flex-1">
+              <div className="flex items-center justify-between gap-3 px-2 py-3 border-t">
+                <label htmlFor="expand-all-stats" className="text-sm cursor-pointer flex-1 min-w-0">
                   {t("Expand All Statistics")}
                 </label>
                 <Switch
@@ -563,8 +575,8 @@ const Index = () => {
                   }
                 />
               </div>
-              <div className="flex items-center justify-between px-2 py-3 border-t">
-                <label htmlFor="hide-statistics-buttons" className="text-sm cursor-pointer flex-1">
+              <div className="flex items-center justify-between gap-3 px-2 py-3 border-t">
+                <label htmlFor="hide-statistics-buttons" className="text-sm cursor-pointer flex-1 min-w-0">
                   {t("Hide Statistics Buttons")}
                 </label>
                 <Switch
@@ -576,8 +588,8 @@ const Index = () => {
                   }
                 />
               </div>
-              <div className="flex items-center justify-between px-2 py-3 border-t">
-                <label htmlFor="skip-reset-confirm" className="text-sm cursor-pointer flex-1">
+              <div className="flex items-center justify-between gap-3 px-2 py-3 border-t">
+                <label htmlFor="skip-reset-confirm" className="text-sm cursor-pointer flex-1 min-w-0">
                   {t("Skip Reset Confirmation")}
                 </label>
                 <Switch
@@ -588,8 +600,8 @@ const Index = () => {
                   }
                 />
               </div>
-              <div className="flex items-center justify-between px-2 py-3 border-t">
-                <label htmlFor="read-only-mode" className="text-sm cursor-pointer flex-1">
+              <div className="flex items-center justify-between gap-3 px-2 py-3 border-t">
+                <label htmlFor="read-only-mode" className="text-sm cursor-pointer flex-1 min-w-0">
                   {t("Read-Only Mode")}
                 </label>
                 <Switch
@@ -599,6 +611,13 @@ const Index = () => {
                     setSettings(prev => ({ ...prev, readOnlyMode: checked }))
                   }
                 />
+              </div>
+              <div className="border-t px-2 py-3 space-y-2">
+                <label id="language-label" className="text-sm">{t("Language")}</label>
+                <Select value={settings.language} onValueChange={(value) => setSettings(prev => ({ ...prev, language: normalizeLanguage(value) }))}>
+                  <SelectTrigger aria-labelledby="language-label"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="fr">Français</SelectItem><SelectItem value="en">English</SelectItem></SelectContent>
+                </Select>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -637,6 +656,7 @@ const Index = () => {
         )}
       </div>
     </div>
+    </LanguageContext.Provider>
   );
 };
 
