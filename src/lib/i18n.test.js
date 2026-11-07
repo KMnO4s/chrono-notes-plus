@@ -9,3 +9,11 @@ describe("note language setting", () => {
     expect(normalizeLanguage("es")).toBe("fr");
   });
 });
+import { createTranslator } from "./i18n";
+describe("French punctuation", () => {
+  const t = createTranslator("fr");
+  test("non-breaking space before colon", () =>
+    expect(t("Running in standalone mode - changes won't sync to Standard Notes")).toContain("autonome\u00A0:"));
+  test("times keep plain colons", () =>
+    expect(t("This will reset the chronometer to 00:00:00. This action cannot be undone.")).toContain("00:00:00"));
+});

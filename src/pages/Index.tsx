@@ -33,6 +33,7 @@ interface AppSettings {
   skipResetConfirmation: boolean;
   expandAllStats: boolean;
   readOnlyMode: boolean;
+  hideEditButtons: boolean;
   hideStatisticsButtons: boolean;
 }
 
@@ -47,6 +48,7 @@ const defaultSettings: AppSettings = {
   skipResetConfirmation: false,
   expandAllStats: true,
   readOnlyMode: false,
+  hideEditButtons: false,
   hideStatisticsButtons: false,
 };
 
@@ -562,6 +564,16 @@ const Index = () => {
                 />
               </div>
               <div className="flex items-center justify-between gap-3 px-2 py-3 border-t">
+                <label htmlFor="hide-edit-buttons" className="text-sm cursor-pointer flex-1 min-w-0">
+                  {t("Hide Edit Buttons")}
+                </label>
+                <Switch
+                  id="hide-edit-buttons"
+                  checked={settings.hideEditButtons}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, hideEditButtons: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3 px-2 py-3 border-t">
                 <label htmlFor="read-only-mode" className="text-sm cursor-pointer flex-1 min-w-0">
                   {t("Read-Only Mode")}
                 </label>
@@ -632,6 +644,7 @@ const Index = () => {
                 skipResetConfirmation={settings.skipResetConfirmation}
                 expandAllStats={settings.expandAllStats}
                 readOnlyMode={settings.readOnlyMode}
+                hideEditButtons={settings.hideEditButtons}
                 hideStatisticsButtons={settings.hideStatisticsButtons}
               />
             ))}
