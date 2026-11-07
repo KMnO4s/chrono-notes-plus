@@ -1,40 +1,44 @@
 import { useEffect } from "react";
 import { useTheme } from "next-themes";
 
+// Detects whether the active Standard Notes theme is dark from its background color.
+function isBackgroundDark(): boolean | null {
+  const probe = document.createElement("div");
+  probe.style.color = "var(--sn-stylekit-background-color)";
+  probe.style.display = "none";
+  document.body.appendChild(probe);
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--sn-stylekit-background-color").trim();
+  const color = getComputedStyle(probe).color;
+  probe.remove();
+  if (!raw) return null;
+  const nums = color.match(/[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 3) return null;
+  const [r, g, b] = nums;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
+}
+
 export function useSNThemeSync() {
   const { setTheme } = useTheme();
 
   useEffect(() => {
-    // Function to detect and apply Standard Notes theme
-    const syncTheme = () => {
-      try {
-        // Check for dark mode via media query (Standard Notes sets this)
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        // Also check document.body classes that might be set by Standard Notes
-        const bodyClasses = document.body.className;
-        const isDark = bodyClasses.includes('dark') || 
-                      bodyClasses.includes('Dark') ||
-                      prefersDark;
-        
-        setTheme(isDark ? "dark" : "light");
-        console.log('[Theme] Synced with Standard Notes:', isDark ? 'dark' : 'light');
-      } catch (e) {
-        console.error('[Theme] Failed to sync theme:', e);
-      }
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const sync = () => {
+      const dark = isBackgroundDark();
+      setTheme((dark ?? mq.matches) ? "dark" : "light");
     };
-
-    // Initial sync
-    syncTheme();
-
-    // Listen for theme changes via media query
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => syncTheme();
-    
-    mediaQuery.addEventListener('change', handleChange);
-
+    sync();
+    const timers = [200, 1000, 3000].map((t) => setTimeout(sync, t));
+    const observer = new MutationObserver(() => setTimeout(sync, 50));
+    observer.observe(document.head, { childList: true, subtree: true, attributes: true });
+    document.querySelectorAll("link[rel=stylesheet]").forEach((l) => l.addEventListener("load", sync));
+    const onLoad = (e: Event) => { if ((e.target as HTMLElement)?.tagName === "LINK") sync(); };
+    document.addEventListener("load", onLoad, true);
+    mq.addEventListener("change", sync);
     return () => {
-      mediaQuery.removeEventListener('change', handleChange);
+      timers.forEach(clearTimeout);
+      observer.disconnect();
+      document.removeEventListener("load", onLoad, true);
+      mq.removeEventListener("change", sync);
     };
   }, [setTheme]);
 }

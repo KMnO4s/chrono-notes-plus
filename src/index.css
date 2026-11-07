@@ -129,6 +129,31 @@ All colors MUST be HSL.
   }
 }
 
+/* Standard Notes theme mapping (falls back to app tokens) */
+@layer base {
+  :root {
+    --app-background: var(--sn-stylekit-background-color, hsl(var(--background)));
+    --app-foreground: var(--sn-stylekit-foreground-color, hsl(var(--foreground)));
+    --app-card: var(--sn-stylekit-background-color, hsl(var(--card)));
+    --app-card-foreground: var(--sn-stylekit-foreground-color, hsl(var(--card-foreground)));
+    --app-popover: var(--sn-stylekit-background-color, hsl(var(--popover)));
+    --app-popover-foreground: var(--sn-stylekit-foreground-color, hsl(var(--popover-foreground)));
+    --app-primary: var(--sn-stylekit-info-color, hsl(var(--primary)));
+    --app-primary-foreground: var(--sn-stylekit-info-contrast-color, hsl(var(--primary-foreground)));
+    --app-secondary: var(--sn-stylekit-contrast-background-color, hsl(var(--secondary)));
+    --app-secondary-foreground: var(--sn-stylekit-contrast-foreground-color, hsl(var(--secondary-foreground)));
+    --app-muted: var(--sn-stylekit-secondary-background-color, hsl(var(--muted)));
+    --app-muted-foreground: var(--sn-stylekit-neutral-color, hsl(var(--muted-foreground)));
+    --app-accent: var(--sn-stylekit-contrast-background-color, hsl(var(--accent)));
+    --app-accent-foreground: var(--sn-stylekit-contrast-foreground-color, hsl(var(--accent-foreground)));
+    --app-destructive: var(--sn-stylekit-danger-color, hsl(var(--destructive)));
+    --app-destructive-foreground: var(--sn-stylekit-danger-contrast-color, hsl(var(--destructive-foreground)));
+    --app-border: var(--sn-stylekit-border-color, hsl(var(--border)));
+    --app-input: var(--sn-stylekit-border-color, hsl(var(--input)));
+    --app-ring: var(--sn-stylekit-info-color, hsl(var(--ring)));
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
