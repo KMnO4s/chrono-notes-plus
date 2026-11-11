@@ -17,3 +17,10 @@ describe("French punctuation", () => {
   test("times keep plain colons", () =>
     expect(t("This will reset the chronometer to 00:00:00. This action cannot be undone.")).toContain("00:00:00"));
 });
+
+import { notePreview } from "./i18n";
+describe("note preview", () => {
+  test("fr plural", () => expect(notePreview("fr", 3, 0)).toBe("3 chronomètres"));
+  test("fr singular running", () => expect(notePreview("fr", 1, 1)).toBe("1 chronomètre · 1 en cours"));
+  test("en none", () => expect(notePreview("en", 0, 0)).toBe("No chronometers"));
+});

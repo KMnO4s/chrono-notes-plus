@@ -24,7 +24,7 @@ import { useSNThemeSync } from "@/hooks/use-sn-theme";
 import snApi from "sn-extension-api";
 import { formatTime, calculateAverageSession } from "@/lib/time-utils";
 
-import { Language, LanguageContext, createTranslator, normalizeLanguage, DEFAULT_LANGUAGE, languageLocale } from "@/lib/i18n";
+import { Language, LanguageContext, createTranslator, normalizeLanguage, DEFAULT_LANGUAGE, languageLocale, notePreview } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AppSettings {
@@ -225,6 +225,7 @@ const Index = () => {
       console.log('[Chrono] - Data preview:', jsonData.substring(0, 100));
       
       try {
+        snApiRef.current.preview = notePreview(settings.language, chronometers.length, chronometers.filter(c => c.isRunning).length);
         snApiRef.current.text = jsonData;
         console.log('[Chrono] ✓ Successfully saved to Standard Notes');
       } catch (e) {
