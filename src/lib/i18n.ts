@@ -117,3 +117,11 @@ export const useLanguage = () => {
   const language = useContext(LanguageContext);
   return { language, locale: languageLocale(language), t: createTranslator(language), colon: colon(language) };
 };
+
+export const notePreview = (language: Language, total: number, running: number): string => {
+  const fr = language === "fr";
+  const base = total === 0
+    ? (fr ? "Aucun chronomètre" : "No chronometers")
+    : `${total} ${fr ? (total === 1 ? "chronomètre" : "chronomètres") : (total === 1 ? "chronometer" : "chronometers")}`;
+  return running > 0 ? `${base} · ${running} ${fr ? "en cours" : "running"}` : base;
+};
